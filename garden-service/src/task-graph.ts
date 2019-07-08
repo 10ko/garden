@@ -28,6 +28,7 @@ export interface TaskResult {
   name: string
   output?: any
   dependencyResults?: TaskResults
+  completedAt: Date
   error?: Error
 }
 
@@ -132,7 +133,8 @@ export class TaskGraph {
       this.garden.events.emit("taskPending", {
         addedAt: new Date(),
         key: task.getKey(),
-        version: task.version,
+        name: task.getName(),
+        type: task.type,
       })
     } else {
       const result = this.resultCache.get(task.getKey(), task.version.versionString)
@@ -206,11 +208,13 @@ export class TaskGraph {
 
       return Bluebird.map(batch, async (node: TaskNode) => {
         const task = node.task
+        const name = task.getName()
         const type = node.getType()
         const key = node.getKey()
+        const completedAt = new Date()
         const description = node.getDescription()
 
-        let result: TaskResult = { type, description, key: task.getKey(), name: task.getName() }
+        let result: TaskResult = { type, description, key, name, completedAt }
 
         try {
           this.logTask(node)
@@ -226,8 +230,10 @@ export class TaskGraph {
           try {
             this.pendingKeys.delete(task.getKey())
             this.garden.events.emit("taskProcessing", {
+              name,
+              type,
+              key,
               startedAt: new Date(),
-              key: task.getKey(),
               version: task.version,
             })
             result = await node.process(dependencyResults)
@@ -524,6 +530,7 @@ class TaskNode {
       key: this.getKey(),
       name: this.task.getName(),
       description: this.getDescription(),
+      completedAt: new Date(),
       output,
       dependencyResults,
     }
