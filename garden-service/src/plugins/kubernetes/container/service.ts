@@ -25,6 +25,7 @@ export async function createServiceResources(service: ContainerService, namespac
         ports: servicePorts,
         selector: {
           service: service.name,
+          version: service.module.version.versionString,
         },
         type,
       },

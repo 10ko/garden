@@ -11,8 +11,8 @@ import { readFileSync, writeFileSync } from "fs"
 import { safeDump } from "js-yaml"
 import * as linewrap from "linewrap"
 import { resolve } from "path"
-import { get, flatten, startCase, uniq } from "lodash"
 import { projectSchema, environmentSchema } from "../config/project"
+import { get, flatten, startCase, uniq, find } from "lodash"
 import { baseModuleSpecSchema } from "../config/module"
 import handlebars = require("handlebars")
 import { joiArray, joi } from "../config/common"
@@ -226,6 +226,10 @@ function renderMarkdownLink(description: NormalizedDescription) {
 
 function makeMarkdownDescription(description: NormalizedDescription, titlePrefix = "") {
   const { formattedType, required, allowedValues, defaultValue } = description
+  let experimentalFeature = false
+  if (description.meta) {
+    experimentalFeature = find(description.meta, attr => attr.experimental) || false
+  }
 
   const parentDescriptions = getParentDescriptions(description)
   const title = renderMarkdownTitle(description, titlePrefix)
@@ -254,6 +258,7 @@ function makeMarkdownDescription(description: NormalizedDescription, titlePrefix
   return {
     ...description,
     breadCrumbs,
+    experimentalFeature,
     formattedExample,
     title,
     table,

@@ -40,6 +40,7 @@ describe("createServiceResources", () => {
           ],
           selector: {
             service: "service-a",
+            version: service.module.version.versionString,
           },
           type: "ClusterIP",
         },
@@ -77,6 +78,7 @@ describe("createServiceResources", () => {
           ],
           selector: {
             service: "service-a",
+            version: service.module.version.versionString,
           },
           type: "ClusterIP",
         },
@@ -113,6 +115,7 @@ describe("createServiceResources", () => {
           ],
           selector: {
             service: "service-a",
+            version: service.module.version.versionString,
           },
           type: "NodePort",
         },
@@ -148,6 +151,7 @@ describe("createServiceResources", () => {
           ],
           selector: {
             service: "service-a",
+            version: service.module.version.versionString,
           },
           type: "NodePort",
         },

@@ -159,6 +159,8 @@ describe("config", () => {
   describe("generateConfigReference", () => {
     it("should return the correct markdown", () => {
       const { markdownReference } = renderConfigReference(portSchema)
+      console.log("---------------")
+      console.log(markdownReference)
       expect(markdownReference).to.equal(dedent`
         \n### \`containerPort\`
 
