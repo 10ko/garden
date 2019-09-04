@@ -23,7 +23,6 @@ const makeGarden = async () => {
 }
 
 describe("BuildDir", () => {
-
   it("should have ensured the existence of the build dir when Garden was initialized", async () => {
     const garden = await makeGarden()
     const buildDirExists = await pathExists(garden.buildDir.buildDirPath)
@@ -53,9 +52,7 @@ describe("BuildDir", () => {
     await garden.buildDir.syncFromSrc(moduleA, garden.log)
     const buildDirA = await garden.buildDir.buildPath(moduleA.name)
 
-    const copiedPaths = [
-      join(buildDirA, "some-dir", "some-file"),
-    ]
+    const copiedPaths = [join(buildDirA, "some-dir", "some-file")]
 
     for (const p of copiedPaths) {
       expect(await pathExists(p)).to.eql(true)
@@ -85,12 +82,15 @@ describe("BuildDir", () => {
       await garden.clearBuilds()
       const graph = await garden.getConfigGraph()
       const modules = await graph.getModules()
-      const tasks = modules.map(module => new BuildTask({
-        garden,
-        log,
-        module,
-        force: true,
-      }))
+      const tasks = modules.map(
+        (module) =>
+          new BuildTask({
+            garden,
+            log,
+            module,
+            force: true,
+          })
+      )
 
       await garden.processTasks(tasks)
 
@@ -117,5 +117,4 @@ describe("BuildDir", () => {
       throw e
     }
   })
-
 })

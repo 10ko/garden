@@ -12,6 +12,7 @@ export default (): string => {
   if (process.env.NODE_ENV === "production") {
     return window.location.host
   }
-  const port = process.env.REACT_APP_GARDEN_SERVICE_PORT || GARDEN_SERVICE_DEFAULT_PORT
+  const port =
+    process.env.REACT_APP_GARDEN_SERVICE_PORT || GARDEN_SERVICE_DEFAULT_PORT
   return `localhost:${port}`
 }

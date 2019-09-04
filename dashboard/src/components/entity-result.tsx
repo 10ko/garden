@@ -28,7 +28,7 @@ const Term = styled.div`
   margin-top: 1rem;
 `
 const Code = styled.code`
-  font-size: .8rem;
+  font-size: 0.8rem;
   white-space: pre-wrap;
 `
 
@@ -49,15 +49,17 @@ const IconContainer = styled.span`
 
 const Key = ({ text }) => (
   <div
-    className={cls(css`
-    padding-right: .5rem;
-  font-size: 13px;
-  line-height: 19px;
-  letter-spacing: 0.01em;
-  color: #4C5862;
-  opacity: 0.5;
-    `,
-      "col-xs-12 pr-1")}
+    className={cls(
+      css`
+        padding-right: 0.5rem;
+        font-size: 13px;
+        line-height: 19px;
+        letter-spacing: 0.01em;
+        color: #4c5862;
+        opacity: 0.5;
+      `,
+      "col-xs-12 pr-1"
+    )}
   >
     {text}
   </div>
@@ -65,14 +67,16 @@ const Key = ({ text }) => (
 
 const Value = ({ children }) => (
   <div
-    className={cls(css`
-  padding-right: .5rem;
-  font-size: 13px;
-  line-height: 19px;
-  letter-spacing: 0.01em;
-  color: #4C5862;
-    `,
-      "col-xs-12")}
+    className={cls(
+      css`
+        padding-right: 0.5rem;
+        font-size: 13px;
+        line-height: 19px;
+        letter-spacing: 0.01em;
+        color: #4c5862;
+      `,
+      "col-xs-12"
+    )}
   >
     {children}
   </div>
@@ -84,7 +88,7 @@ const Field = ({ children }) => (
       "pt-1",
       css`
         flex: 0 0;
-      `,
+      `
     )}
   >
     {children}
@@ -150,19 +154,21 @@ export default ({
         className={cls(
           "p-1",
           css`
-          display: flex;
-          flex-direction: column;
-          max-height: calc(100vh - 2rem);
-        `,
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 2rem);
+          `
         )}
       >
         <div className="row middle-xs">
           <div>
-            <IconContainer className={cls(`garden-icon`, `garden-icon--${type}`)} />
+            <IconContainer
+              className={cls(`garden-icon`, `garden-icon--${type}`)}
+            />
           </div>
           <div
             className={css`
-              padding-left: .5rem;
+              padding-left: 0.5rem;
             `}
           >
             <Header
@@ -176,7 +182,11 @@ export default ({
 
           <ClosePaneContainer>
             {onRefresh && (
-              <ActionIcon onClick={onRefresh} inProgress={loading || false} iconClassName="redo-alt" />
+              <ActionIcon
+                onClick={onRefresh}
+                inProgress={loading || false}
+                iconClassName="redo-alt"
+              />
             )}
             <ActionIcon onClick={onClose} iconClassName="window-close" />
           </ClosePaneContainer>
@@ -184,9 +194,7 @@ export default ({
 
         <Field>
           <Key text="Type" />
-          <Value>
-            {capitalize(type)}
-          </Value>
+          <Value>{capitalize(type)}</Value>
         </Field>
 
         <Field>
@@ -215,7 +223,9 @@ export default ({
           </Field>
         )}
         {/* we only show the output if has content and only for these types */}
-        {(type === "test" || type === "run" || type === "task") && outputEl !== null && outputEl}
+        {(type === "test" || type === "run" || type === "task") &&
+          outputEl !== null &&
+          outputEl}
       </div>
     </Card>
   )

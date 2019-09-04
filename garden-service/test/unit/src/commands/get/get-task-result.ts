@@ -8,9 +8,7 @@ describe("GetTaskResultCommand", () => {
   it("should throw error if task not found", async () => {
     const name = "imaginary-task"
 
-    const garden = await makeTestGarden(
-      resolve(dataDir, "test-project-dependants"),
-    )
+    const garden = await makeTestGarden(resolve(dataDir, "test-project-dependants"))
     const log = garden.log
     const command = new GetTaskResultCommand()
 
@@ -24,7 +22,7 @@ describe("GetTaskResultCommand", () => {
           args: { name },
           opts: withDefaultGlobalOpts({}),
         }),
-      "parameter",
+      "parameter"
     )
   })
 

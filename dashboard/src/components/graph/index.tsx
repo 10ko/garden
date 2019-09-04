@@ -19,7 +19,10 @@ import Card from "../card"
 import "./graph.scss"
 import { colors, fontMedium } from "../../styles/variables"
 import Spinner, { SpinnerProps } from "../spinner"
-import { SelectGraphNode, StackGraphSupportedFilterKeys } from "../../context/ui"
+import {
+  SelectGraphNode,
+  StackGraphSupportedFilterKeys,
+} from "../../context/ui"
 import { WsEventMessage, SupportedEventName } from "../../context/events"
 import { GraphOutputWithNodeStatus } from "../../context/data"
 import { FiltersButton, Filters } from "../group-filter"
@@ -59,8 +62,7 @@ const taskNodeEventNames: Set<TaskNodeEventName> = new Set([
 const selectedClassName = "selected"
 let selectedNodeId: string | null = null
 function clearGraphNodeSelection() {
-  const selectedNode =
-    selectedNodeId && document.getElementById(selectedNodeId)
+  const selectedNode = selectedNodeId && document.getElementById(selectedNodeId)
   selectedNode && selectedNode.classList.remove(selectedClassName)
 }
 
@@ -73,7 +75,7 @@ function getNodeClass(node) {
     className += selectedClassName
   }
 
-  className += (node.status && ` ${node.status}` || "")
+  className += (node.status && ` ${node.status}`) || ""
   return className
 }
 
@@ -81,7 +83,7 @@ function drawChart(
   graph: Graph,
   width: number,
   height: number,
-  onGraphNodeSelected: (string) => void,
+  onGraphNodeSelected: (string) => void
 ) {
   // Create the input graph
   const g = new dagreD3.graphlib.Graph()
@@ -184,11 +186,11 @@ const makeLabel = (name: string, type: string, moduleName: string) => {
     <span>
       <span class='module-name'>${moduleName}</span>
         ${
-    moduleName !== name
-      ? `<span> / </span>
+          moduleName !== name
+            ? `<span> / </span>
            <span>${name}</span>`
-      : ``
-    }
+            : ``
+        }
     </div>`
 }
 
@@ -206,8 +208,8 @@ const ProcessSpinner = styled<any, SpinnerProps>(Spinner)`
 `
 
 type ChartState = {
-  nodes: Node[],
-  edges: Edge[],
+  nodes: Node[]
+  edges: Edge[]
 }
 
 interface Props {
@@ -240,7 +242,6 @@ class Chart extends Component<Props, ChartState> {
   }
 
   componentDidMount() {
-
     this.drawChart()
 
     // Re-draw graph on **end** of window resize event (hence the timer)
@@ -254,7 +255,7 @@ class Chart extends Component<Props, ChartState> {
   }
 
   componentWillUnmount() {
-    window.onresize = () => { }
+    window.onresize = () => {}
   }
 
   drawChart() {
@@ -278,9 +279,10 @@ class Chart extends Component<Props, ChartState> {
         }
       })
     const edges: Edge[] = this.props.graph.relationships
-      .filter(n =>
-        this.props.filters[n.dependant.type].selected &&
-        this.props.filters[n.dependency.type].selected,
+      .filter(
+        n =>
+          this.props.filters[n.dependant.type].selected &&
+          this.props.filters[n.dependency.type].selected
       )
       .map(r => {
         const source = r.dependency
@@ -297,12 +299,13 @@ class Chart extends Component<Props, ChartState> {
 
   componentDidUpdate(prevProps: Props, prevState: ChartState) {
     if (
-      (prevState !== this.state) ||
-      (prevProps.graph !== this.props.graph) ||
+      prevState !== this.state ||
+      prevProps.graph !== this.props.graph ||
       (!prevProps.selectedGraphNode && this.props.selectedGraphNode) ||
       (prevProps.selectedGraphNode && !this.props.selectedGraphNode) ||
-      (prevProps.filters !== this.props.filters) ||
-      (prevProps.layoutChanged !== this.props.layoutChanged)) {
+      prevProps.filters !== this.props.filters ||
+      prevProps.layoutChanged !== this.props.layoutChanged
+    ) {
       this.drawChart()
     }
 
@@ -335,7 +338,7 @@ class Chart extends Component<Props, ChartState> {
           className={cls(
             css`
               position: relative;
-            `,
+            `
           )}
         >
           <div
@@ -344,18 +347,18 @@ class Chart extends Component<Props, ChartState> {
                 position: absolute;
                 top: 1rem;
                 display: flex;
-              `,
+              `
             )}
           >
-            <div className="ml-1" >
+            <div className="ml-1">
               <FiltersButton
                 filters={this.props.filters}
                 onFilter={this.props.onFilter}
               />
               <div
                 className={css`
-                display: flex;
-              `}
+                  display: flex;
+                `}
               >
                 <Status>{status}</Status>
                 {spinner}
@@ -378,59 +381,59 @@ class Chart extends Component<Props, ChartState> {
                 display: flex;
                 justify-content: flex-end;
               `,
-              "mr-1",
+              "mr-1"
             )}
           >
             <Span>
               <span
                 className={css`
-                    color: ${colors.taskState.ready};
-                  `}
+                  color: ${colors.taskState.ready};
+                `}
               >
                 —{" "}
               </span>
               Ready
-              </Span>
+            </Span>
             <Span>
               <span
                 className={css`
-                    color: ${colors.taskState.pending};
-                  `}
+                  color: ${colors.taskState.pending};
+                `}
               >
                 —{" "}
               </span>
               Pending
-              </Span>
+            </Span>
             <Span>
               <span
                 className={css`
-                    color: ${colors.taskState.processing};
-                  `}
+                  color: ${colors.taskState.processing};
+                `}
               >
                 --{" "}
               </span>
               Processing
-              </Span>
+            </Span>
             <Span>
               <span
                 className={css`
-                 color: ${colors.taskState.cancelled};
-                  `}
+                  color: ${colors.taskState.cancelled};
+                `}
               >
                 —{" "}
               </span>
               Cancelled
-              </Span>
+            </Span>
             <Span>
               <span
                 className={css`
-                 color: ${colors.taskState.error};
-                  `}
+                  color: ${colors.taskState.error};
+                `}
               >
                 —{" "}
               </span>
               Error
-              </Span>
+            </Span>
           </div>
         </div>
       </Card>

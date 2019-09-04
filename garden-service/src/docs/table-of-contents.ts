@@ -53,7 +53,7 @@ function attachMetadata(tree: FileTree) {
     file = readFileSync(tree.path, "utf-8")
   } catch (e) {
     if (e.code !== "ENOENT") {
-      throw (e)
+      throw e
     }
   }
   if (file) {

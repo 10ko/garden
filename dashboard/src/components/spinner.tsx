@@ -25,7 +25,11 @@ const Spinner = styled<any, SpinnerProps>("div")`
   height: ${props => props.size || "4.5rem"};
   border-radius: 50%;
   background: ${colors.gardenPink};
-  background: linear-gradient(to right, ${colors.gardenPink} 10%, ${colors.gardenPinkRgba} 42%);
+  background: linear-gradient(
+    to right,
+    ${colors.gardenPink} 10%,
+    ${colors.gardenPinkRgba} 42%
+  );
   position: relative;
   -webkit-animation: load3 1.4s infinite linear;
   animation: load3 1.4s infinite linear;
@@ -40,14 +44,14 @@ const Spinner = styled<any, SpinnerProps>("div")`
     position: absolute;
     top: 0;
     left: 0;
-    content: '';
+    content: "";
   }
   :after {
     background: ${props => props.background || colors.grayLight};
     width: 75%;
     height: 75%;
     border-radius: 50%;
-    content: '';
+    content: "";
     margin: auto;
     position: absolute;
     top: 0;

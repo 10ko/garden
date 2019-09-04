@@ -93,16 +93,19 @@ const templateModuleConfig: ExecModuleConfig = {
   type: "exec",
 }
 
-async function configureProvider(
-  { log, config, projectName, dependencies }: ConfigureProviderParams<OpenFaasConfig>,
-): Promise<ConfigureProviderResult> {
+async function configureProvider({
+  log,
+  config,
+  projectName,
+  dependencies,
+}: ConfigureProviderParams<OpenFaasConfig>): Promise<ConfigureProviderResult> {
   const k8sProvider = getK8sProvider(dependencies)
 
   if (!config.hostname) {
     if (!k8sProvider.config.defaultHostname) {
       throw new ConfigurationError(
         `openfaas: Must configure hostname if no default hostname is configured on Kubernetes provider.`,
-        { config },
+        { config }
       )
     }
 
@@ -252,7 +255,6 @@ async function deleteService(params: DeleteServiceParams<OpenFaasModule>): Promi
       cwd: service.module.buildPath,
       args: ["remove", "-f", stackFilename],
     })
-
   } catch (err) {
     found = false
   }
@@ -273,12 +275,14 @@ async function getServiceStatus({ ctx, module, service, log }: GetServiceStatusP
   const openFaasCtx = <OpenFaasPluginContext>ctx
   const k8sProvider = getK8sProvider(ctx.provider.dependencies)
 
-  const ingresses: ServiceIngress[] = [{
-    hostname: ctx.provider.config.hostname,
-    path: getServicePath(module),
-    port: k8sProvider.config.ingressHttpPort,
-    protocol: "http",
-  }]
+  const ingresses: ServiceIngress[] = [
+    {
+      hostname: ctx.provider.config.hostname,
+      path: getServicePath(module),
+      port: k8sProvider.config.ingressHttpPort,
+      protocol: "http",
+    },
+  ]
 
   const namespace = await getAppNamespace(openFaasCtx, log, k8sProvider)
   const api = await KubeApi.factory(log, k8sProvider)
@@ -299,7 +303,13 @@ async function getServiceStatus({ ctx, module, service, log }: GetServiceStatusP
   const envVersion = findByName<any>(container.env, "GARDEN_VERSION")
   const version = envVersion ? envVersion.value : undefined
   const resourceVersion = parseInt(deployment.metadata.resourceVersion!, 10)
-  const status = await checkWorkloadStatus({ api, namespace, resource: deployment, log, resourceVersion })
+  const status = await checkWorkloadStatus({
+    api,
+    namespace,
+    resource: deployment,
+    log,
+    resourceVersion,
+  })
 
   return {
     state: status.state,

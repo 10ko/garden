@@ -20,7 +20,9 @@ describe("exec plugin", () => {
   let log: LogEntry
 
   beforeEach(async () => {
-    garden = await makeTestGarden(projectRoot, { extraPlugins: { exec: gardenPlugin } })
+    garden = await makeTestGarden(projectRoot, {
+      extraPlugins: { exec: gardenPlugin },
+    })
     log = garden.log
     graph = await garden.getConfigGraph()
     await garden.clearBuilds()
@@ -28,11 +30,7 @@ describe("exec plugin", () => {
 
   it("should correctly parse exec modules", async () => {
     const modules = keyBy(await graph.getModules(), "name")
-    const {
-      "module-a": moduleA,
-      "module-b": moduleB,
-      "module-c": moduleC,
-    } = modules
+    const { "module-a": moduleA, "module-b": moduleB, "module-c": moduleC } = modules
 
     expect(moduleA.build).to.eql({
       dependencies: [],

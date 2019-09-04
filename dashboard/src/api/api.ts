@@ -22,7 +22,7 @@ export interface ApiRequest {
 }
 export type FetchLogsParam = string[]
 export type FetchTaskResultParam = { name: string }
-export type FetchTestResultParam = { name: string, module: string }
+export type FetchTestResultParam = { name: string; module: string }
 
 const MAX_LOG_LINES = 5000
 
@@ -57,7 +57,12 @@ async function apiPost<T>(command: string, parameters: {} = {}): Promise<T> {
   const headers = { "Content-Type": "application/json" }
   const data: ApiRequest = { command, parameters }
 
-  const res = await axios.request<CommandResult<T>>({ url, method, headers, data })
+  const res = await axios.request<CommandResult<T>>({
+    url,
+    method,
+    headers,
+    data,
+  })
 
   if (res.data.errors) {
     throw res.data.errors

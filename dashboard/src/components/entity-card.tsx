@@ -17,13 +17,14 @@ interface EntityCardProps {
 }
 const EntityCard = styled.div<EntityCardProps>`
   max-height: 13rem;
-  background-color: ${props => (props && props.type && colors.cardTypes[props.type] || "white")};
+  background-color: ${props =>
+    (props && props.type && colors.cardTypes[props.type]) || "white"};
   margin-right: 1rem;
-  box-shadow: 2px 2px 9px rgba(0,0,0,0.14);
+  box-shadow: 2px 2px 9px rgba(0, 0, 0, 0.14);
   border-radius: 4px;
   width: 100%;
   margin-top: 1rem;
-  padding: .75rem;
+  padding: 0.75rem;
 
   &:first-of-type {
     margin-top: 0;
@@ -36,7 +37,7 @@ const EntityCard = styled.div<EntityCardProps>`
 
 const Header = styled.div`
   width: 100%;
-  display:flex;
+  display: flex;
   justify-content: space-between;
 `
 
@@ -44,21 +45,22 @@ const Content = styled.div`
   width: 100%;
   position: relative;
   max-height: 10rem;
-  padding-top: .75rem;
-  &:empty
-  {
-      display:none;
+  padding-top: 0.75rem;
+  &:empty {
+    display: none;
   }
 `
 
 type StateContainerProps = {
-  state: string,
+  state: string
 }
 const StateContainer = styled.div<StateContainerProps>`
-  padding: 0 .5rem;
+  padding: 0 0.5rem;
   margin-left: auto;
-  background-color: ${props => (props && props.state ? colors.state[props.state] : colors.gardenGrayLight)};
-  display: ${props => (props && props.state && colors.state[props.state] ? "flex" : "none")};
+  background-color: ${props =>
+    props && props.state ? colors.state[props.state] : colors.gardenGrayLight};
+  display: ${props =>
+    props && props.state && colors.state[props.state] ? "flex" : "none"};
   align-items: center;
   border-radius: 0.25rem;
   font-weight: 500;
@@ -66,7 +68,7 @@ const StateContainer = styled.div<StateContainerProps>`
   line-height: 1rem;
   text-align: center;
   letter-spacing: 0.02em;
-  color: #FFFFFF;
+  color: #ffffff;
   height: 1rem;
 `
 
@@ -78,13 +80,13 @@ const Tag = styled.div`
   line-height: 10px;
   text-align: right;
   letter-spacing: 0.01em;
-  color: #90A0B7;
+  color: #90a0b7;
 `
 
 const Name = styled.div`
   font-size: 0.9375rem;
   font-weight: 500;
-  color: rgba(0, 0, 0, .87);
+  color: rgba(0, 0, 0, 0.87);
   padding-top: 0.125rem;
 `
 
@@ -101,7 +103,6 @@ export default ({
   type,
   entity: { name, isLoading, state },
 }: Props) => {
-
   return (
     <EntityCard type={type}>
       <Header>
@@ -109,16 +110,10 @@ export default ({
           <Tag>{type.toUpperCase()}</Tag>
           <Name>{name}</Name>
         </div>
-        {state && (
-          <StateContainer state={state}>
-            {state}
-          </StateContainer>
-        )}
+        {state && <StateContainer state={state}>{state}</StateContainer>}
       </Header>
       <Content>
-        {isLoading && (
-          <ContentLoader height={100} />
-        )}
+        {isLoading && <ContentLoader height={100} />}
         {!isLoading && children}
       </Content>
     </EntityCard>

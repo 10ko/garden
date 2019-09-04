@@ -48,7 +48,7 @@ const SidebarWrapper = styled.div`
 `
 
 type SidebarContainerProps = {
-  visible: boolean,
+  visible: boolean
 }
 const SidebarContainer = styled.div<SidebarContainerProps>`
   display: ${props => (props.visible ? `block` : "none")};

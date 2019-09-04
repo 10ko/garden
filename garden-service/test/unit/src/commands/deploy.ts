@@ -33,12 +33,14 @@ const testProvider: PluginFactory = () => {
   const testStatuses: { [key: string]: ServiceStatus } = {
     "service-a": {
       state: "ready",
-      ingresses: [{
-        hostname: "service-a.test-project-b.local.app.garden",
-        path: "/path-a",
-        port: 80,
-        protocol: "http",
-      }],
+      ingresses: [
+        {
+          hostname: "service-a.test-project-b.local.app.garden",
+          path: "/path-a",
+          port: 80,
+          protocol: "http",
+        },
+      ],
     },
     "service-c": {
       state: "ready",
@@ -141,10 +143,26 @@ describe("DeployCommand", () => {
         forwardablePorts: [],
         state: "unknown",
       },
-      "deploy.service-a": { forwardablePorts: [], version: "1", state: "ready" },
-      "deploy.service-b": { forwardablePorts: [], version: "1", state: "ready" },
-      "deploy.service-c": { forwardablePorts: [], version: "1", state: "ready" },
-      "deploy.service-d": { forwardablePorts: [], version: "1", state: "ready" },
+      "deploy.service-a": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
+      "deploy.service-b": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
+      "deploy.service-c": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
+      "deploy.service-d": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
     })
   })
 
@@ -197,8 +215,16 @@ describe("DeployCommand", () => {
         forwardablePorts: [],
         state: "unknown",
       },
-      "deploy.service-a": { forwardablePorts: [], version: "1", state: "ready" },
-      "deploy.service-b": { forwardablePorts: [], version: "1", state: "ready" },
+      "deploy.service-a": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
+      "deploy.service-b": {
+        forwardablePorts: [],
+        version: "1",
+        state: "ready",
+      },
     })
   })
 })

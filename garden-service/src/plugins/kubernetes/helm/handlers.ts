@@ -20,12 +20,12 @@ import { dedent } from "../../../util/string"
 import { joi } from "../../../config/common"
 import { getPortForwardHandler } from "../port-forward"
 
-const helmModuleOutputsSchema = joi.object()
-  .keys({
-    "release-name": joi.string()
-      .required()
-      .description("The Helm release name of the service."),
-  })
+const helmModuleOutputsSchema = joi.object().keys({
+  "release-name": joi
+    .string()
+    .required()
+    .description("The Helm release name of the service."),
+})
 
 async function describeType() {
   return {

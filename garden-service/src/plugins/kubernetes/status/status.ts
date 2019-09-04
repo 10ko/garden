@@ -46,7 +46,7 @@ export interface StatusHandlerParams {
   namespace: string
   resource: KubernetesServerResource
   log: LogEntry
-  resourceVersion?: number,
+  resourceVersion?: number
 }
 
 interface ObjHandler {
@@ -71,14 +71,16 @@ const objHandlers: { [kind: string]: ObjHandler } = {
   },
 
   ReplicaSet: async ({ api, namespace, resource }) => {
-    return checkPodStatus(resource, await getPods(
-      api, namespace, (<KubernetesServerResource<V1ReplicaSet>>resource).spec.selector!.matchLabels!),
+    return checkPodStatus(
+      resource,
+      await getPods(api, namespace, (<KubernetesServerResource<V1ReplicaSet>>resource).spec.selector!.matchLabels!)
     )
   },
 
   ReplicationController: async ({ api, namespace, resource }) => {
-    return checkPodStatus(resource, await getPods(
-      api, namespace, (<KubernetesServerResource<V1ReplicationController>>resource).spec.selector),
+    return checkPodStatus(
+      resource,
+      await getPods(api, namespace, (<KubernetesServerResource<V1ReplicationController>>resource).spec.selector)
     )
   },
 
@@ -105,7 +107,10 @@ const objHandlers: { [kind: string]: ObjHandler } = {
  * Check if the specified Kubernetes objects are deployed and fully rolled out
  */
 export async function checkResourceStatuses(
-  api: KubeApi, namespace: string, manifests: KubernetesResource[], log: LogEntry,
+  api: KubeApi,
+  namespace: string,
+  manifests: KubernetesResource[],
+  log: LogEntry
 ): Promise<ResourceStatus[]> {
   return Bluebird.map(manifests, async (manifest) => {
     return checkResourceStatus(api, namespace, manifest, log)
@@ -113,7 +118,10 @@ export async function checkResourceStatuses(
 }
 
 export async function checkResourceStatus(
-  api: KubeApi, namespace: string, manifest: KubernetesResource, log: LogEntry,
+  api: KubeApi,
+  namespace: string,
+  manifest: KubernetesResource,
+  log: LogEntry
 ) {
   const handler = objHandlers[manifest.kind]
 
@@ -147,11 +155,11 @@ export async function checkResourceStatus(
 }
 
 interface WaitParams {
-  ctx: PluginContext,
-  provider: KubernetesProvider,
-  serviceName: string,
-  resources: KubernetesResource[],
-  log: LogEntry,
+  ctx: PluginContext
+  provider: KubernetesProvider
+  serviceName: string
+  resources: KubernetesResource[]
+  log: LogEntry
 }
 
 /**
@@ -201,7 +209,7 @@ export async function waitForResources({ ctx, provider, serviceName, resources, 
       }
     }
 
-    if (combineStates(statuses.map(s => s.state)) === "ready") {
+    if (combineStates(statuses.map((s) => s.state)) === "ready") {
       // If applicable, wait until Services properly point to each Pod in the resource list.
       // This step is put in to give the cluster a moment to update its network routing.
       // For example, when a Deployment passes its health check, Kubernetes doesn't instantly route Service traffic
@@ -218,7 +226,11 @@ export async function waitForResources({ ctx, provider, serviceName, resources, 
     }
   }
 
-  statusLine.setState({ symbol: "info", section: serviceName, msg: `Service deployed` })
+  statusLine.setState({
+    symbol: "info",
+    section: serviceName,
+    msg: `Service deployed`,
+  })
 }
 
 interface ComparisonResult {
@@ -230,21 +242,25 @@ interface ComparisonResult {
  * Check if each of the given Kubernetes objects matches what's installed in the cluster
  */
 export async function compareDeployedObjects(
-  ctx: KubernetesPluginContext, api: KubeApi, namespace: string, resources: KubernetesResource[], log: LogEntry,
-  skipDiff: boolean,
+  ctx: KubernetesPluginContext,
+  api: KubeApi,
+  namespace: string,
+  resources: KubernetesResource[],
+  log: LogEntry,
+  skipDiff: boolean
 ): Promise<ComparisonResult> {
   // Unroll any `List` resource types
-  resources = flatten(resources.map((r: any) => r.apiVersion === "v1" && r.kind === "List" ? r.items : [r]))
+  resources = flatten(resources.map((r: any) => (r.apiVersion === "v1" && r.kind === "List" ? r.items : [r])))
 
   // Check if any resources are missing from the cluster.
-  const maybeDeployedObjects = await Bluebird.map(
-    resources, resource => getDeployedResource(ctx, ctx.provider, resource, log),
+  const maybeDeployedObjects = await Bluebird.map(resources, (resource) =>
+    getDeployedResource(ctx, ctx.provider, resource, log)
   )
-  const deployedObjects = <KubernetesResource[]>maybeDeployedObjects.filter(o => o !== null)
+  const deployedObjects = <KubernetesResource[]>maybeDeployedObjects.filter((o) => o !== null)
 
   const result: ComparisonResult = {
     state: "unknown",
-    remoteObjects: <KubernetesResource[]>deployedObjects.filter(o => o !== null),
+    remoteObjects: <KubernetesResource[]>deployedObjects.filter((o) => o !== null),
   }
 
   const logDescription = (resource: KubernetesResource) => `${resource.kind}/${resource.metadata.name}`
@@ -276,7 +292,13 @@ export async function compareDeployedObjects(
     const provider = ctx.provider
 
     try {
-      await kubectl.exec({ log, provider, namespace, args: ["diff", "-f", "-"], input: Buffer.from(yamlResources) })
+      await kubectl.exec({
+        log,
+        provider,
+        namespace,
+        args: ["diff", "-f", "-"],
+        input: Buffer.from(yamlResources),
+      })
 
       // If the commands exits succesfully, the check was successful and the diff is empty.
       log.verbose(`kubectl diff indicates all resources match the deployed resources.`)
@@ -301,21 +323,23 @@ export async function compareDeployedObjects(
   // but doesn't exhaustively handle normalization issues.
   log.debug(`Getting currently deployed resources...`)
 
-  const deployedObjectStatuses: ResourceStatus[] = await Bluebird.map(
-    deployedObjects,
-    async (resource) => checkResourceStatus(api, namespace, resource, log))
+  const deployedObjectStatuses: ResourceStatus[] = await Bluebird.map(deployedObjects, async (resource) =>
+    checkResourceStatus(api, namespace, resource, log)
+  )
 
-  const deployedStates = deployedObjectStatuses.map(s => s.state)
-  if (deployedStates.find(s => s !== "ready")) {
-
+  const deployedStates = deployedObjectStatuses.map((s) => s.state)
+  if (deployedStates.find((s) => s !== "ready")) {
     const descriptions = zip(deployedObjects, deployedStates)
       .filter(([_, s]) => s !== "ready")
-      .map(([o, s]) => `${logDescription(o!)}: "${s}"`).join("\n")
+      .map(([o, s]) => `${logDescription(o!)}: "${s}"`)
+      .join("\n")
 
-    log.silly(dedent`
+    log.silly(
+      dedent`
     Resource(s) with non-ready status found in the cluster:
 
-    ${descriptions}` + "\n")
+    ${descriptions}` + "\n"
+    )
 
     result.state = combineStates(deployedStates)
     return result
@@ -325,8 +349,8 @@ export async function compareDeployedObjects(
 
   for (let [newSpec, existingSpec] of zip(resources, deployedObjects) as KubernetesResource[][]) {
     // to avoid normalization issues, we convert all numeric values to strings and then compare
-    newSpec = <KubernetesResource>deepMap(newSpec, v => typeof v === "number" ? v.toString() : v)
-    existingSpec = <KubernetesResource>deepMap(existingSpec, v => typeof v === "number" ? v.toString() : v)
+    newSpec = <KubernetesResource>deepMap(newSpec, (v) => (typeof v === "number" ? v.toString() : v))
+    existingSpec = <KubernetesResource>deepMap(existingSpec, (v) => (typeof v === "number" ? v.toString() : v))
 
     // the API version may implicitly change when deploying
     existingSpec.apiVersion = newSpec.apiVersion
@@ -382,10 +406,13 @@ export async function compareDeployedObjects(
 }
 
 async function getDeployedResource(
-  ctx: PluginContext, provider: KubernetesProvider, resource: KubernetesResource, log: LogEntry,
+  ctx: PluginContext,
+  provider: KubernetesProvider,
+  resource: KubernetesResource,
+  log: LogEntry
 ): Promise<KubernetesResource | null> {
   const api = await KubeApi.factory(log, provider)
-  const namespace = resource.metadata.namespace || await getAppNamespace(ctx, log, provider)
+  const namespace = resource.metadata.namespace || (await getAppNamespace(ctx, log, provider))
 
   try {
     const res = await api.readBySpec(namespace, resource, log)
@@ -406,7 +433,7 @@ function removeNull<T>(value: T | Iterable<T>): T | Iterable<T> | { [K in keyof 
   if (isArray(value)) {
     return value.map(removeNull)
   } else if (isPlainObject(value)) {
-    return <{ [K in keyof T]: T[K] }>mapValues(pickBy(<any>value, v => v !== null), removeNull)
+    return <{ [K in keyof T]: T[K] }>mapValues(pickBy(<any>value, (v) => v !== null), removeNull)
   } else {
     return value
   }

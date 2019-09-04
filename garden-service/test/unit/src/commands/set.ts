@@ -21,6 +21,8 @@ describe("SetSecretCommand", () => {
     })
 
     const actions = await garden.getActionHelper()
-    expect(await actions.getSecret({ log, pluginName, key: "mykey" })).to.eql({ value: "myvalue" })
+    expect(await actions.getSecret({ log, pluginName, key: "mykey" })).to.eql({
+      value: "myvalue",
+    })
   })
 })

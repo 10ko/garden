@@ -12,21 +12,25 @@ const testProvider: PluginFactory = () => {
   const testStatuses: { [key: string]: ServiceStatus } = {
     "service-a": {
       state: "ready",
-      ingresses: [{
-        hostname: "service-a.test-project-b.local.app.garden",
-        path: "/path-a",
-        protocol: "http",
-        port: 32000,
-      }],
+      ingresses: [
+        {
+          hostname: "service-a.test-project-b.local.app.garden",
+          path: "/path-a",
+          protocol: "http",
+          port: 32000,
+        },
+      ],
     },
     "service-b": {
       state: "ready",
-      ingresses: [{
-        hostname: "service-b.test-project-b.local.app.garden",
-        path: "/",
-        port: 32000,
-        protocol: "http",
-      }],
+      ingresses: [
+        {
+          hostname: "service-b.test-project-b.local.app.garden",
+          path: "/",
+          port: 32000,
+          protocol: "http",
+        },
+      ],
     },
     "service-c": {
       state: "ready",
@@ -80,7 +84,6 @@ describe("commands.call", () => {
     expect(result.path).to.equal("/path-a")
     expect(result.response.status).to.equal(200)
     expect(result.response.data).to.equal("bla")
-
   })
 
   it("should default to the path '/' if that is exposed if no path is requested", async () => {

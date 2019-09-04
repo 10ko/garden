@@ -6,11 +6,7 @@ import * as td from "testdouble"
 import { Garden } from "../../../../../src/garden"
 import { PluginContext } from "../../../../../src/plugin-context"
 import { gardenPlugin } from "../../../../../src/plugins/container/container"
-import {
-  dataDir,
-  expectError,
-  makeTestGarden,
-} from "../../../../helpers"
+import { dataDir, expectError, makeTestGarden } from "../../../../helpers"
 import { moduleFromConfig } from "../../../../../src/types/module"
 import { ModuleConfig } from "../../../../../src/config/module"
 import { LogEntry } from "../../../../../src/logger/log-entry"
@@ -69,7 +65,9 @@ describe("plugins.container", () => {
   let log: LogEntry
 
   beforeEach(async () => {
-    garden = await makeTestGarden(projectRoot, { extraPlugins: { container: gardenPlugin } })
+    garden = await makeTestGarden(projectRoot, {
+      extraPlugins: { container: gardenPlugin },
+    })
     log = garden.log
     const provider = await garden.resolveProvider("container")
     ctx = await garden.getPluginContext(provider)
@@ -109,59 +107,67 @@ describe("plugins.container", () => {
           },
           buildArgs: {},
           extraFlags: [],
-          services: [{
-            name: "service-a",
-            annotations: {},
-            args: ["echo"],
-            dependencies: [],
-            daemon: false,
-            ingresses: [
-              {
-                annotations: {},
-                path: "/",
-                port: "http",
+          services: [
+            {
+              name: "service-a",
+              annotations: {},
+              args: ["echo"],
+              dependencies: [],
+              daemon: false,
+              ingresses: [
+                {
+                  annotations: {},
+                  path: "/",
+                  port: "http",
+                },
+              ],
+              env: {
+                SOME_ENV_VAR: "value",
               },
-            ],
-            env: {
-              SOME_ENV_VAR: "value",
-            },
-            healthCheck: {
-              httpGet: {
-                path: "/health",
-                port: "http",
+              healthCheck: {
+                httpGet: {
+                  path: "/health",
+                  port: "http",
+                },
               },
+              limits: {
+                cpu: 123,
+                memory: 456,
+              },
+              ports: [
+                {
+                  name: "http",
+                  protocol: "TCP",
+                  containerPort: 8080,
+                  servicePort: 8080,
+                },
+              ],
+              replicas: 1,
+              volumes: [],
             },
-            limits: {
-              cpu: 123,
-              memory: 456,
+          ],
+          tasks: [
+            {
+              name: "task-a",
+              args: ["echo", "OK"],
+              dependencies: [],
+              env: {
+                TASK_ENV_VAR: "value",
+              },
+              timeout: null,
             },
-            ports: [{
-              name: "http",
-              protocol: "TCP",
-              containerPort: 8080,
-              servicePort: 8080,
-            }],
-            replicas: 1,
-            volumes: [],
-          }],
-          tasks: [{
-            name: "task-a",
-            args: ["echo", "OK"],
-            dependencies: [],
-            env: {
-              TASK_ENV_VAR: "value",
+          ],
+          tests: [
+            {
+              name: "unit",
+              args: ["echo", "OK"],
+              dependencies: [],
+              env: {
+                TEST_ENV_VAR: "value",
+              },
+              timeout: null,
             },
-            timeout: null,
-          }],
-          tests: [{
-            name: "unit",
-            args: ["echo", "OK"],
-            dependencies: [],
-            env: {
-              TEST_ENV_VAR: "value",
-            },
-            timeout: null,
-          }],
+          ],
         },
 
         serviceConfigs: [],
@@ -182,41 +188,49 @@ describe("plugins.container", () => {
         },
         path: modulePath,
         type: "container",
-        spec:
-        {
+        spec: {
           build: {
             dependencies: [],
             timeout: DEFAULT_BUILD_TIMEOUT,
           },
           buildArgs: {},
           extraFlags: [],
-          services:
-            [{
+          services: [
+            {
               name: "service-a",
               annotations: {},
               args: ["echo"],
               dependencies: [],
               daemon: false,
-              ingresses: [{
-                annotations: {},
-                path: "/",
-                port: "http",
-              }],
+              ingresses: [
+                {
+                  annotations: {},
+                  path: "/",
+                  port: "http",
+                },
+              ],
               env: {
                 SOME_ENV_VAR: "value",
               },
-              healthCheck:
-                { httpGet: { path: "/health", port: "http" } },
+              healthCheck: { httpGet: { path: "/health", port: "http" } },
               limits: {
                 cpu: 123,
                 memory: 456,
               },
-              ports: [{ name: "http", protocol: "TCP", containerPort: 8080, servicePort: 8080 }],
+              ports: [
+                {
+                  name: "http",
+                  protocol: "TCP",
+                  containerPort: 8080,
+                  servicePort: 8080,
+                },
+              ],
               replicas: 1,
               volumes: [],
-            }],
-          tasks:
-            [{
+            },
+          ],
+          tasks: [
+            {
               name: "task-a",
               args: ["echo", "OK"],
               dependencies: [],
@@ -224,9 +238,10 @@ describe("plugins.container", () => {
                 TASK_ENV_VAR: "value",
               },
               timeout: null,
-            }],
-          tests:
-            [{
+            },
+          ],
+          tests: [
+            {
               name: "unit",
               args: ["echo", "OK"],
               dependencies: [],
@@ -234,48 +249,54 @@ describe("plugins.container", () => {
                 TEST_ENV_VAR: "value",
               },
               timeout: null,
-            }],
+            },
+          ],
         },
-        serviceConfigs:
-          [{
+        serviceConfigs: [
+          {
             name: "service-a",
             dependencies: [],
             hotReloadable: false,
-            spec:
-            {
+            spec: {
               name: "service-a",
               annotations: {},
               args: ["echo"],
               dependencies: [],
               daemon: false,
-              ingresses: [{
-                annotations: {},
-                path: "/",
-                port: "http",
-              }],
+              ingresses: [
+                {
+                  annotations: {},
+                  path: "/",
+                  port: "http",
+                },
+              ],
               env: {
                 SOME_ENV_VAR: "value",
               },
-              healthCheck:
-                { httpGet: { path: "/health", port: "http" } },
+              healthCheck: { httpGet: { path: "/health", port: "http" } },
               limits: {
                 cpu: 123,
                 memory: 456,
               },
-              ports: [{ name: "http", protocol: "TCP", containerPort: 8080, servicePort: 8080 }],
+              ports: [
+                {
+                  name: "http",
+                  protocol: "TCP",
+                  containerPort: 8080,
+                  servicePort: 8080,
+                },
+              ],
               replicas: 1,
               volumes: [],
             },
-          }],
-        taskConfigs:
-          [{
+          },
+        ],
+        taskConfigs: [
+          {
             dependencies: [],
             name: "task-a",
             spec: {
-              args: [
-                "echo",
-                "OK",
-              ],
+              args: ["echo", "OK"],
               dependencies: [],
               env: {
                 TASK_ENV_VAR: "value",
@@ -284,13 +305,13 @@ describe("plugins.container", () => {
               timeout: null,
             },
             timeout: null,
-          }],
-        testConfigs:
-          [{
+          },
+        ],
+        testConfigs: [
+          {
             name: "unit",
             dependencies: [],
-            spec:
-            {
+            spec: {
               name: "unit",
               args: ["echo", "OK"],
               dependencies: [],
@@ -300,7 +321,8 @@ describe("plugins.container", () => {
               timeout: null,
             },
             timeout: null,
-          }],
+          },
+        ],
       })
     })
 
@@ -323,39 +345,45 @@ describe("plugins.container", () => {
           },
           buildArgs: {},
           extraFlags: [],
-          services: [{
-            name: "service-a",
-            annotations: {},
-            args: ["echo"],
-            dependencies: [],
-            daemon: false,
-            ingresses: [
-              {
-                annotations: {},
-                path: "/",
-                port: "bla",
-              },
-            ],
-            limits: defaultContainerLimits,
-            env: {},
-            ports: [],
-            replicas: 1,
-            volumes: [],
-          }],
-          tasks: [{
-            name: "task-a",
-            args: ["echo"],
-            dependencies: [],
-            env: {},
-            timeout: null,
-          }],
-          tests: [{
-            name: "unit",
-            args: ["echo", "OK"],
-            dependencies: [],
-            env: {},
-            timeout: null,
-          }],
+          services: [
+            {
+              name: "service-a",
+              annotations: {},
+              args: ["echo"],
+              dependencies: [],
+              daemon: false,
+              ingresses: [
+                {
+                  annotations: {},
+                  path: "/",
+                  port: "bla",
+                },
+              ],
+              limits: defaultContainerLimits,
+              env: {},
+              ports: [],
+              replicas: 1,
+              volumes: [],
+            },
+          ],
+          tasks: [
+            {
+              name: "task-a",
+              args: ["echo"],
+              dependencies: [],
+              env: {},
+              timeout: null,
+            },
+          ],
+          tests: [
+            {
+              name: "unit",
+              args: ["echo", "OK"],
+              dependencies: [],
+              env: {},
+              timeout: null,
+            },
+          ],
         },
 
         serviceConfigs: [],
@@ -363,10 +391,7 @@ describe("plugins.container", () => {
         testConfigs: [],
       }
 
-      await expectError(
-        () => configure({ ctx, moduleConfig, log }),
-        "configuration",
-      )
+      await expectError(() => configure({ ctx, moduleConfig, log }), "configuration")
     })
 
     it("should fail with invalid port in httpGet healthcheck spec", async () => {
@@ -388,32 +413,36 @@ describe("plugins.container", () => {
           },
           buildArgs: {},
           extraFlags: [],
-          services: [{
-            name: "service-a",
-            annotations: {},
-            args: ["echo"],
-            dependencies: [],
-            daemon: false,
-            ingresses: [],
-            env: {},
-            healthCheck: {
-              httpGet: {
-                path: "/",
-                port: "bla",
+          services: [
+            {
+              name: "service-a",
+              annotations: {},
+              args: ["echo"],
+              dependencies: [],
+              daemon: false,
+              ingresses: [],
+              env: {},
+              healthCheck: {
+                httpGet: {
+                  path: "/",
+                  port: "bla",
+                },
               },
+              limits: defaultContainerLimits,
+              ports: [],
+              replicas: 1,
+              volumes: [],
             },
-            limits: defaultContainerLimits,
-            ports: [],
-            replicas: 1,
-            volumes: [],
-          }],
-          tasks: [{
-            name: "task-a",
-            args: ["echo"],
-            dependencies: [],
-            env: {},
-            timeout: null,
-          }],
+          ],
+          tasks: [
+            {
+              name: "task-a",
+              args: ["echo"],
+              dependencies: [],
+              env: {},
+              timeout: null,
+            },
+          ],
           tests: [],
         },
 
@@ -422,10 +451,7 @@ describe("plugins.container", () => {
         testConfigs: [],
       }
 
-      await expectError(
-        () => configure({ ctx, moduleConfig, log }),
-        "configuration",
-      )
+      await expectError(() => configure({ ctx, moduleConfig, log }), "configuration")
     })
 
     it("should fail with invalid port in tcpPort healthcheck spec", async () => {
@@ -447,29 +473,33 @@ describe("plugins.container", () => {
           },
           buildArgs: {},
           extraFlags: [],
-          services: [{
-            name: "service-a",
-            annotations: {},
-            args: ["echo"],
-            dependencies: [],
-            daemon: false,
-            ingresses: [],
-            env: {},
-            healthCheck: {
-              tcpPort: "bla",
+          services: [
+            {
+              name: "service-a",
+              annotations: {},
+              args: ["echo"],
+              dependencies: [],
+              daemon: false,
+              ingresses: [],
+              env: {},
+              healthCheck: {
+                tcpPort: "bla",
+              },
+              limits: defaultContainerLimits,
+              ports: [],
+              replicas: 1,
+              volumes: [],
             },
-            limits: defaultContainerLimits,
-            ports: [],
-            replicas: 1,
-            volumes: [],
-          }],
-          tasks: [{
-            name: "task-a",
-            args: ["echo"],
-            dependencies: [],
-            env: {},
-            timeout: null,
-          }],
+          ],
+          tasks: [
+            {
+              name: "task-a",
+              args: ["echo"],
+              dependencies: [],
+              env: {},
+              timeout: null,
+            },
+          ],
           tests: [],
         },
 
@@ -478,10 +508,7 @@ describe("plugins.container", () => {
         testConfigs: [],
       }
 
-      await expectError(
-        () => configure({ ctx, moduleConfig, log }),
-        "configuration",
-      )
+      await expectError(() => configure({ ctx, moduleConfig, log }), "configuration")
     })
   })
 
@@ -624,7 +651,10 @@ describe("plugins.container", () => {
       const dockerCli = td.replace(helpers, "dockerCli")
 
       const result = await publishModule({ ctx, log, module })
-      expect(result).to.eql({ message: "Published some/image:12345", published: true })
+      expect(result).to.eql({
+        message: "Published some/image:12345",
+        published: true,
+      })
 
       td.verify(dockerCli(module, ["tag", "some/image:12345", "some/image:12345"]), { times: 0 })
       td.verify(dockerCli(module, ["push", "some/image:12345"]))
@@ -642,7 +672,10 @@ describe("plugins.container", () => {
       const dockerCli = td.replace(helpers, "dockerCli")
 
       const result = await publishModule({ ctx, log, module })
-      expect(result).to.eql({ message: "Published some/image:1.1", published: true })
+      expect(result).to.eql({
+        message: "Published some/image:1.1",
+        published: true,
+      })
 
       td.verify(dockerCli(module, ["tag", "some/image:12345", "some/image:1.1"]))
       td.verify(dockerCli(module, ["push", "some/image:1.1"]))
@@ -690,7 +723,9 @@ describe("plugins.container", () => {
 
       await expectError(
         () => helpers.checkDockerVersion(),
-        (err) => { expect(err.message).to.equal("Docker client needs to be version 17.07.0 or newer (got 17.06)") },
+        (err) => {
+          expect(err.message).to.equal("Docker client needs to be version 17.07.0 or newer (got 17.06)")
+        }
       )
     })
 
@@ -704,7 +739,9 @@ describe("plugins.container", () => {
 
       await expectError(
         () => helpers.checkDockerVersion(),
-        (err) => { expect(err.message).to.equal("Docker server needs to be version 17.07.0 or newer (got 17.06)") },
+        (err) => {
+          expect(err.message).to.equal("Docker server needs to be version 17.07.0 or newer (got 17.06)")
+        }
       )
     })
   })

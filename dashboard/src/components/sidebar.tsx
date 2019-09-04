@@ -47,7 +47,6 @@ const A = styled.a(linkStyle)
 const Link = styled(NavLink)(linkStyle)
 
 class Sidebar extends Component<Props, State> {
-
   constructor(props) {
     super(props)
 
@@ -65,10 +64,16 @@ class Sidebar extends Component<Props, State> {
             {this.props.pages.map(page => {
               let link: React.ReactNode
               if (page.url) {
-                link = <A href={page.url} target="_blank" title={page.description}>
-                  {page.title}
-                  <i className={`${css("color: #ccc; margin-left: 0.5em;")} fas fa-external-link-alt`} />
-                </A>
+                link = (
+                  <A href={page.url} target="_blank" title={page.description}>
+                    {page.title}
+                    <i
+                      className={`${css(
+                        "color: #ccc; margin-left: 0.5em;"
+                      )} fas fa-external-link-alt`}
+                    />
+                  </A>
+                )
               } else {
                 link = (
                   <Link
@@ -80,18 +85,13 @@ class Sidebar extends Component<Props, State> {
                   </Link>
                 )
               }
-              return (
-                <Button key={page.title}>
-                  {link}
-                </Button>
-              )
+              return <Button key={page.title}>{link}</Button>
             })}
           </ul>
         </nav>
       </div>
     )
   }
-
 }
 
 export default Sidebar

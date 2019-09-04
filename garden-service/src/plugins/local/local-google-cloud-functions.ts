@@ -78,13 +78,15 @@ export const gardenPlugin = (): GardenPlugin => ({
             annotations: {},
             args: ["/app/start.sh", functionEntrypoint],
             daemon: false,
-            ingresses: [{
-              name: "default",
-              annotations: {},
-              hostname: s.spec.hostname,
-              port: "http",
-              path: "/",
-            }],
+            ingresses: [
+              {
+                name: "default",
+                annotations: {},
+                hostname: s.spec.hostname,
+                port: "http",
+                path: "/",
+              },
+            ],
             env: {},
             healthCheck: { tcpPort: "http" },
             limits: s.spec.limits,
@@ -114,14 +116,18 @@ export const gardenPlugin = (): GardenPlugin => ({
           allowPublish: true,
           build: {
             command: [],
-            dependencies: parsed.build.dependencies.concat([{
-              name: emulatorModuleName,
-              plugin: pluginName,
-              copy: [{
-                source: "child/Dockerfile",
-                target: "Dockerfile",
-              }],
-            }]),
+            dependencies: parsed.build.dependencies.concat([
+              {
+                name: emulatorModuleName,
+                plugin: pluginName,
+                copy: [
+                  {
+                    source: "child/Dockerfile",
+                    target: "Dockerfile",
+                  },
+                ],
+              },
+            ]),
           },
           name: parsed.name,
           outputs: {},
@@ -133,7 +139,7 @@ export const gardenPlugin = (): GardenPlugin => ({
               baseImageName: `${baseContainerName}:\${modules.${baseContainerName}.version}`,
             },
             image: `${parsed.name}:\${modules.${parsed.name}.version}`,
-            services: serviceConfigs.map(s => <ContainerServiceSpec>s.spec),
+            services: serviceConfigs.map((s) => <ContainerServiceSpec>s.spec),
             tests: [],
           },
 

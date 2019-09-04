@@ -25,9 +25,7 @@ function prepareData(data: TestResultOutput | TaskResultOutput) {
   const startedAt = data.startedAt
   const completedAt = data.completedAt
   const duration =
-    startedAt &&
-    completedAt &&
-    getDuration(startedAt, completedAt)
+    startedAt && completedAt && getDuration(startedAt, completedAt)
 
   const output = data.output
   return { duration, startedAt, completedAt, output }

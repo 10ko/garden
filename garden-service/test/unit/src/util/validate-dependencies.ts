@@ -20,8 +20,8 @@ import { flatten } from "lodash"
  */
 async function scanAndGetConfigs(garden: Garden) {
   const moduleConfigs: ModuleConfig[] = await garden.resolveModuleConfigs()
-  const serviceNames = flatten(moduleConfigs.map(m => m.serviceConfigs.map(s => s.name)))
-  const taskNames = flatten(moduleConfigs.map(m => m.taskConfigs.map(s => s.name)))
+  const serviceNames = flatten(moduleConfigs.map((m) => m.serviceConfigs.map((s) => s.name)))
+  const taskNames = flatten(moduleConfigs.map((m) => m.taskConfigs.map((s) => s.name)))
 
   return {
     moduleConfigs,

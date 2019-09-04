@@ -7,13 +7,7 @@
  */
 
 import * as Bluebird from "bluebird"
-import {
-  Command,
-  CommandResult,
-  CommandParams,
-  StringParameter,
-  StringsParameter,
-} from "./base"
+import { Command, CommandResult, CommandParams, StringParameter, StringsParameter } from "./base"
 import { NotFoundError } from "../exceptions"
 import dedent = require("dedent")
 import { ServiceStatus, ServiceStatusMap } from "../types/service"
@@ -26,13 +20,11 @@ export class DeleteCommand extends Command {
   alias = "del"
   help = "Delete configuration or objects."
 
-  subCommands = [
-    DeleteSecretCommand,
-    DeleteEnvironmentCommand,
-    DeleteServiceCommand,
-  ]
+  subCommands = [DeleteSecretCommand, DeleteEnvironmentCommand, DeleteServiceCommand]
 
-  async action() { return {} }
+  async action() {
+    return {}
+  }
 }
 
 const deleteSecretArgs = {
@@ -63,12 +55,14 @@ export class DeleteSecretCommand extends Command<typeof deleteSecretArgs> {
 
   arguments = deleteSecretArgs
 
-  async action(
-    { garden, log, args }: CommandParams<DeleteSecretArgs>,
-  ): Promise<CommandResult<DeleteSecretResult>> {
+  async action({ garden, log, args }: CommandParams<DeleteSecretArgs>): Promise<CommandResult<DeleteSecretResult>> {
     const key = args.key!
     const actions = await garden.getActionHelper()
-    const result = await actions.deleteSecret({ log, pluginName: args.provider!, key })
+    const result = await actions.deleteSecret({
+      log,
+      pluginName: args.provider!,
+      key,
+    })
 
     if (result.found) {
       log.info(`Deleted config key ${args.key}`)
@@ -147,7 +141,7 @@ export class DeleteServiceCommand extends Command {
 
     const actions = await garden.getActionHelper()
 
-    await Bluebird.map(services, async service => {
+    await Bluebird.map(services, async (service) => {
       result[service.name] = await actions.deleteService({ log, service })
     })
 

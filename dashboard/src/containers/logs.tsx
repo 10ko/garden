@@ -46,12 +46,8 @@ const LogsContainer = () => {
   }
 
   if (logs.error || config.error) {
-    return (
-      <PageError error={(logs.error || config.error)} />
-    )
+    return <PageError error={logs.error || config.error} />
   }
 
-  return (
-    <Logs loadLogs={loadLogs} config={config.data} logs={logs.data} />
-  )
+  return <Logs loadLogs={loadLogs} config={config.data} logs={logs.data} />
 }

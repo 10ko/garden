@@ -24,23 +24,31 @@ import { getForwardablePorts } from "../port-forward"
 
 const helmStatusCodeMap: { [code: number]: ServiceState } = {
   // see https://github.com/kubernetes/helm/blob/master/_proto/hapi/release/status.proto
-  0: "unknown",   // UNKNOWN
-  1: "ready",     // DEPLOYED
-  2: "missing",   // DELETED
-  3: "stopped",   // SUPERSEDED
+  0: "unknown", // UNKNOWN
+  1: "ready", // DEPLOYED
+  2: "missing", // DELETED
+  3: "stopped", // SUPERSEDED
   4: "unhealthy", // FAILED
-  5: "stopped",   // DELETING
+  5: "stopped", // DELETING
   6: "deploying", // PENDING_INSTALL
   7: "deploying", // PENDING_UPGRADE
   8: "deploying", // PENDING_ROLLBACK
 }
 
-export async function getServiceStatus(
-  { ctx, module, service, log, hotReload }: GetServiceStatusParams<HelmModule>,
-): Promise<ServiceStatus> {
+export async function getServiceStatus({
+  ctx,
+  module,
+  service,
+  log,
+  hotReload,
+}: GetServiceStatusParams<HelmModule>): Promise<ServiceStatus> {
   const k8sCtx = <KubernetesPluginContext>ctx
   // need to build to be able to check the status
-  const buildStatus = await getExecModuleBuildStatus({ ctx: k8sCtx, module, log })
+  const buildStatus = await getExecModuleBuildStatus({
+    ctx: k8sCtx,
+    module,
+    log,
+  })
   if (!buildStatus.ready) {
     await buildHelmModule({ ctx: k8sCtx, module, log })
   }
@@ -49,7 +57,12 @@ export async function getServiceStatus(
   const chartResources = await getChartResources(k8sCtx, module, log)
 
   if (hotReload) {
-    const target = await findServiceResource({ ctx: k8sCtx, log, chartResources, module })
+    const target = await findServiceResource({
+      ctx: k8sCtx,
+      log,
+      chartResources,
+      module,
+    })
     const hotReloadSpec = getHotReloadSpec(service)
     const resourceSpec = module.spec.serviceResource!
 
@@ -80,11 +93,19 @@ export async function getServiceStatus(
 }
 
 export async function getReleaseStatus(
-  ctx: KubernetesPluginContext, releaseName: string, log: LogEntry,
+  ctx: KubernetesPluginContext,
+  releaseName: string,
+  log: LogEntry
 ): Promise<ServiceStatus> {
   try {
     log.silly(`Getting the release status for ${releaseName}`)
-    const res = JSON.parse(await helm({ ctx, log, args: ["status", releaseName, "--output", "json"] }))
+    const res = JSON.parse(
+      await helm({
+        ctx,
+        log,
+        args: ["status", releaseName, "--output", "json"],
+      })
+    )
     const statusCode = res.info.status.code
     return {
       state: helmStatusCodeMap[statusCode],

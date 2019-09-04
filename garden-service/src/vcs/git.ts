@@ -37,7 +37,7 @@ export function parseGitUrl(url: string) {
       deline`
         Repository URLs must contain a hash part pointing to a specific branch or tag
         (e.g. https://github.com/org/repo.git#master)`,
-      { repositoryUrl: url },
+      { repositoryUrl: url }
     )
   }
   const parsed = { repositoryUrl: parts[0], hash: parts[1] }
@@ -56,7 +56,7 @@ export class GitHandler extends VcsHandler {
     return async (...args: string[]) => {
       log.silly(`Calling git with args '${args.join(" ")}`)
       const { stdout } = await execa("git", args, { cwd, maxBuffer: 10 * 1024 * 1024 })
-      return stdout.split("\n").filter(line => line.length > 0)
+      return stdout.split("\n").filter((line) => line.length > 0)
     }
   }
 
@@ -82,17 +82,18 @@ export class GitHandler extends VcsHandler {
     const gitRoot = (await git("rev-parse", "--show-toplevel"))[0]
 
     // List modified files, so that we can ensure we have the right hash for them later
-    const modified = new Set((await this.getModifiedFiles(git, path))
-      // The output here is relative to the git root, and not the directory `path`
-      .map(modifiedRelPath => resolve(gitRoot, modifiedRelPath)),
+    const modified = new Set(
+      (await this.getModifiedFiles(git, path))
+        // The output here is relative to the git root, and not the directory `path`
+        .map((modifiedRelPath) => resolve(gitRoot, modifiedRelPath))
     )
 
     // List tracked but ignored files (we currently exclude those as well, so we need to query that specially)
-    const trackedButIgnored = new Set(flatten(
-      await Promise.all(this.ignoreFiles.map(f =>
-        git("ls-files", "--ignored", "--exclude-per-directory", f),
-      )),
-    ))
+    const trackedButIgnored = new Set(
+      flatten(
+        await Promise.all(this.ignoreFiles.map((f) => git("ls-files", "--ignored", "--exclude-per-directory", f)))
+      )
+    )
 
     // We run ls-files for each ignoreFile and do a manual set-intersection (by counting elements in an object)
     // in order to optimize the flow.
@@ -173,7 +174,7 @@ export class GitHandler extends VcsHandler {
           // We filter symlinked directories out, since hashObject() will fail to
           // process them.
           if (!(await stat(resolvedPath)).isDirectory()) {
-            hash = await this.hashObject(resolvedPath) || ""
+            hash = (await this.hashObject(resolvedPath)) || ""
           }
         } catch (err) {
           // 128 = File no longer exists
@@ -185,11 +186,15 @@ export class GitHandler extends VcsHandler {
       } else {
         return { path: resolvedPath, hash: f.hash }
       }
-    }).filter(f => f.hash !== "")
+    }).filter((f) => f.hash !== "")
   }
 
   private async cloneRemoteSource(
-    log: LogEntry, remoteSourcesPath: string, repositoryUrl: string, hash: string, absPath: string,
+    log: LogEntry,
+    remoteSourcesPath: string,
+    repositoryUrl: string,
+    hash: string,
+    absPath: string
   ) {
     const git = this.gitCli(log, remoteSourcesPath)
     // Use `--recursive` to include submodules
@@ -205,7 +210,11 @@ export class GitHandler extends VcsHandler {
     const isCloned = await pathExists(absPath)
 
     if (!isCloned) {
-      const entry = log.info({ section: name, msg: `Fetching from ${url}`, status: "active" })
+      const entry = log.info({
+        section: name,
+        msg: `Fetching from ${url}`,
+        status: "active",
+      })
       const { repositoryUrl, hash } = parseGitUrl(url)
 
       try {
@@ -231,7 +240,11 @@ export class GitHandler extends VcsHandler {
 
     await this.ensureRemoteSource({ url, name, sourceType, log })
 
-    const entry = log.info({ section: name, msg: "Getting remote state", status: "active" })
+    const entry = log.info({
+      section: name,
+      msg: "Getting remote state",
+      status: "active",
+    })
     await git("remote", "update")
 
     const remoteCommitId = getCommitIdFromRefList(await git("ls-remote", repositoryUrl, hash))

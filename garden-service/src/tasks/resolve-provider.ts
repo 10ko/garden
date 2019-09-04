@@ -62,8 +62,8 @@ export class ResolveProviderTask extends BaseTask {
       if (!config) {
         throw new ConfigurationError(
           `Missing provider dependency '${providerName}' in configuration for provider '${this.config.name}'. ` +
-          `Are you missing a provider configuration?`,
-          { config: this.config, missingProviderName: providerName },
+            `Are you missing a provider configuration?`,
+          { config: this.config, missingProviderName: providerName }
         )
       }
 
@@ -81,7 +81,7 @@ export class ResolveProviderTask extends BaseTask {
   }
 
   async process(dependencyResults: TaskResults) {
-    const resolvedProviders: Provider[] = Object.values(dependencyResults).map(result => result.output)
+    const resolvedProviders: Provider[] = Object.values(dependencyResults).map((result) => result.output)
 
     const context = new ProviderConfigContext(this.garden.environmentName, this.garden.projectName, resolvedProviders)
 
@@ -166,7 +166,12 @@ export class ResolveProviderTask extends BaseTask {
         pluginName,
         defaultHandler: async () => ({ status }),
       })
-      const result = await prepareHandler({ ctx, log: this.log, force: this.forceInit, status })
+      const result = await prepareHandler({
+        ctx,
+        log: this.log,
+        force: this.forceInit,
+        status,
+      })
 
       status = result.status
 
@@ -176,7 +181,7 @@ export class ResolveProviderTask extends BaseTask {
     if (!status.ready) {
       throw new PluginError(
         `Provider ${pluginName} reports status as not ready and could not prepare the configured environment.`,
-        { name: pluginName, status, provider: tmpProvider },
+        { name: pluginName, status, provider: tmpProvider }
       )
     }
 

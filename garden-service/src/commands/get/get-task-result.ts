@@ -7,12 +7,7 @@
  */
 
 import { ConfigGraph } from "../../config-graph"
-import {
-  Command,
-  CommandResult,
-  CommandParams,
-  StringParameter,
-} from "../base"
+import { Command, CommandResult, CommandParams, StringParameter } from "../base"
 import { printHeader } from "../../logger/util"
 import { getTaskVersion } from "../../tasks/task"
 import { RunTaskResult } from "../../types/plugin/task/runTask"
@@ -50,19 +45,13 @@ export class GetTaskResultCommand extends Command<Args> {
 
     const actions = await garden.getActionHelper()
 
-    const taskResult: RunTaskResult | null = await actions.getTaskResult(
-      {
-        log,
-        task,
-        taskVersion: await getTaskVersion(garden, graph, task),
-      },
-    )
+    const taskResult: RunTaskResult | null = await actions.getTaskResult({
+      log,
+      task,
+      taskVersion: await getTaskVersion(garden, graph, task),
+    })
 
-    printHeader(
-      headerLog,
-      `Task result for task ${chalk.cyan(taskName)}`,
-      "rocket",
-    )
+    printHeader(headerLog, `Task result for task ${chalk.cyan(taskName)}`, "rocket")
 
     if (taskResult !== null) {
       const output: TaskResultOutput = {
@@ -77,9 +66,7 @@ export class GetTaskResultCommand extends Command<Args> {
       log.info({ data: taskResult })
       return { result: output }
     } else {
-      log.info(
-        `Could not find results for task '${taskName}'`,
-      )
+      log.info(`Could not find results for task '${taskName}'`)
       const output: TaskResultOutput = {
         name: taskName,
         module: null,

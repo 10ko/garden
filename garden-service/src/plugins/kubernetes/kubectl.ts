@@ -13,20 +13,26 @@ import { LogEntry } from "../../logger/log-entry"
 import { KubernetesProvider } from "./config"
 
 export interface ApplyParams {
-  log: LogEntry,
+  log: LogEntry
   provider: KubernetesProvider
-  manifests: object[],
-  dryRun?: boolean,
-  force?: boolean,
-  pruneSelector?: string,
-  namespace?: string,
+  manifests: object[]
+  dryRun?: boolean
+  force?: boolean
+  pruneSelector?: string
+  namespace?: string
 }
 
 export const KUBECTL_DEFAULT_TIMEOUT = 300
 
-export async function apply(
-  { log, provider, manifests: objects, dryRun = false, force = false, namespace, pruneSelector }: ApplyParams,
-) {
+export async function apply({
+  log,
+  provider,
+  manifests: objects,
+  dryRun = false,
+  force = false,
+  namespace,
+  pruneSelector,
+}: ApplyParams) {
   const input = Buffer.from(encodeYamlMulti(objects))
 
   let args = ["apply"]
@@ -45,32 +51,25 @@ export async function apply(
 }
 
 export interface DeleteObjectsParams {
-  log: LogEntry,
+  log: LogEntry
   provider: KubernetesProvider
-  namespace: string,
-  labelKey: string,
-  labelValue: string,
-  objectTypes: string[],
-  includeUninitialized?: boolean,
+  namespace: string
+  labelKey: string
+  labelValue: string
+  objectTypes: string[]
+  includeUninitialized?: boolean
 }
 
-export async function deleteObjectsByLabel(
-  {
-    log,
-    provider,
-    namespace,
-    labelKey,
-    labelValue,
-    objectTypes,
-    includeUninitialized = false,
-  }: DeleteObjectsParams) {
-
-  let args = [
-    "delete",
-    objectTypes.join(","),
-    "-l",
-    `${labelKey}=${labelValue}`,
-  ]
+export async function deleteObjectsByLabel({
+  log,
+  provider,
+  namespace,
+  labelKey,
+  labelValue,
+  objectTypes,
+  includeUninitialized = false,
+}: DeleteObjectsParams) {
+  let args = ["delete", objectTypes.join(","), "-l", `${labelKey}=${labelValue}`]
 
   includeUninitialized && args.push("--include-uninitialized")
 
@@ -130,9 +129,7 @@ class Kubectl extends BinaryCmd {
   private prepareArgs(params: KubectlParams) {
     const { provider, namespace, configPath, args } = params
 
-    const opts: string[] = [
-      `--context=${provider.config.context}`,
-    ]
+    const opts: string[] = [`--context=${provider.config.context}`]
 
     if (provider.config.kubeconfig) {
       opts.push(`--kubeconfig=${provider.config.kubeconfig}`)

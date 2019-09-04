@@ -60,14 +60,23 @@ function getPortForwardKey(targetResource: string, port: number) {
  * We maintain a simple in-process cache of randomly allocated local ports that have been port-forwarded to a
  * given port on a given Kubernetes resource.
  */
-export async function getPortForward(
-  { ctx, log, namespace, targetResource, port }:
-    { ctx: PluginContext, log: LogEntry, namespace: string, targetResource: string, port: number },
-): Promise<PortForward> {
+export async function getPortForward({
+  ctx,
+  log,
+  namespace,
+  targetResource,
+  port,
+}: {
+  ctx: PluginContext
+  log: LogEntry
+  namespace: string
+  targetResource: string
+  port: number
+}): Promise<PortForward> {
   // Using lock here to avoid concurrency issues (multiple parallel requests for same forward).
   const key = getPortForwardKey(targetResource, port)
 
-  return portForwardRegistrationLock.acquire("register-port-forward", (async () => {
+  return portForwardRegistrationLock.acquire("register-port-forward", async () => {
     let localPort: number
 
     const registered = registeredPortForwards[key]
@@ -89,7 +98,12 @@ export async function getPortForward(
     const portForwardArgs = ["port-forward", targetResource, portMapping]
     log.silly(`Running 'kubectl ${portForwardArgs.join(" ")}'`)
 
-    const proc = await kubectl.spawn({ log, provider: k8sCtx.provider, namespace, args: portForwardArgs })
+    const proc = await kubectl.spawn({
+      log,
+      provider: k8sCtx.provider,
+      namespace,
+      args: portForwardArgs,
+    })
 
     return new Promise((resolve) => {
       proc.on("error", (error) => {
@@ -108,17 +122,26 @@ export async function getPortForward(
         }
       })
     })
-  }))
+  })
 }
 
-export async function getPortForwardHandler(
-  { ctx, log, service, targetPort }: GetPortForwardParams,
-): Promise<GetPortForwardResult> {
+export async function getPortForwardHandler({
+  ctx,
+  log,
+  service,
+  targetPort,
+}: GetPortForwardParams): Promise<GetPortForwardResult> {
   const provider = ctx.provider as KubernetesProvider
   const namespace = await getAppNamespace(ctx, log, provider)
   const targetResource = `Service/${service.name}`
 
-  const fwd = await getPortForward({ ctx, log, namespace, targetResource, port: targetPort })
+  const fwd = await getPortForward({
+    ctx,
+    log,
+    namespace,
+    targetResource,
+    port: targetPort,
+  })
 
   return {
     hostname: "localhost",

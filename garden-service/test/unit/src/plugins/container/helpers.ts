@@ -6,18 +6,11 @@ import * as td from "testdouble"
 import { Garden } from "../../../../../src/garden"
 import { PluginContext } from "../../../../../src/plugin-context"
 import { gardenPlugin } from "../../../../../src/plugins/container/container"
-import {
-  dataDir,
-  expectError,
-  makeTestGarden,
-} from "../../../../helpers"
+import { dataDir, expectError, makeTestGarden } from "../../../../helpers"
 import { moduleFromConfig } from "../../../../../src/types/module"
 import { ModuleConfig } from "../../../../../src/config/module"
 import { LogEntry } from "../../../../../src/logger/log-entry"
-import {
-  ContainerModuleSpec,
-  ContainerModuleConfig,
-} from "../../../../../src/plugins/container/config"
+import { ContainerModuleSpec, ContainerModuleConfig } from "../../../../../src/plugins/container/config"
 import { containerHelpers as helpers, DEFAULT_BUILD_TIMEOUT } from "../../../../../src/plugins/container/helpers"
 
 describe("containerHelpers", () => {
@@ -61,7 +54,9 @@ describe("containerHelpers", () => {
   let log: LogEntry
 
   beforeEach(async () => {
-    garden = await makeTestGarden(projectRoot, { extraPlugins: { container: gardenPlugin } })
+    garden = await makeTestGarden(projectRoot, {
+      extraPlugins: { container: gardenPlugin },
+    })
     log = garden.log
     const provider = await garden.resolveProvider("container")
     ctx = await garden.getPluginContext(provider)
@@ -330,44 +325,54 @@ describe("containerHelpers", () => {
 
   describe("unparseImageId", () => {
     it("should correctly compose a simple id", () => {
-      expect(helpers.unparseImageId({
-        repository: "image",
-        tag: "tag",
-      })).to.equal("image:tag")
+      expect(
+        helpers.unparseImageId({
+          repository: "image",
+          tag: "tag",
+        })
+      ).to.equal("image:tag")
     })
 
     it("should correctly compose an id with a namespace", () => {
-      expect(helpers.unparseImageId({
-        namespace: "namespace",
-        repository: "image",
-        tag: "tag",
-      })).to.equal("namespace/image:tag")
+      expect(
+        helpers.unparseImageId({
+          namespace: "namespace",
+          repository: "image",
+          tag: "tag",
+        })
+      ).to.equal("namespace/image:tag")
     })
 
     it("should correctly compose an id with a host and namespace", () => {
-      expect(helpers.unparseImageId({
-        host: "my-host.com",
-        namespace: "namespace",
-        repository: "image",
-        tag: "tag",
-      })).to.equal("my-host.com/namespace/image:tag")
+      expect(
+        helpers.unparseImageId({
+          host: "my-host.com",
+          namespace: "namespace",
+          repository: "image",
+          tag: "tag",
+        })
+      ).to.equal("my-host.com/namespace/image:tag")
     })
 
     it("should set a default namespace when host but no namespace is specified", () => {
-      expect(helpers.unparseImageId({
-        host: "my-host.com",
-        repository: "image",
-        tag: "tag",
-      })).to.equal("my-host.com/_/image:tag")
+      expect(
+        helpers.unparseImageId({
+          host: "my-host.com",
+          repository: "image",
+          tag: "tag",
+        })
+      ).to.equal("my-host.com/_/image:tag")
     })
 
     it("should correctly compose an id with a host and multi-level namespace", () => {
-      expect(helpers.unparseImageId({
-        host: "my-host.com",
-        namespace: "a/b/c/d",
-        repository: "image",
-        tag: "tag",
-      })).to.equal("my-host.com/a/b/c/d/image:tag")
+      expect(
+        helpers.unparseImageId({
+          host: "my-host.com",
+          namespace: "a/b/c/d",
+          repository: "image",
+          tag: "tag",
+        })
+      ).to.equal("my-host.com/a/b/c/d/image:tag")
     })
 
     it("should throw on an empty name", async () => {

@@ -6,12 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import {
-  Command,
-  CommandResult,
-  CommandParams,
-  StringParameter,
-} from "../base"
+import { Command, CommandResult, CommandParams, StringParameter } from "../base"
 import { NotFoundError } from "../../exceptions"
 import { TestResult } from "../../types/plugin/module/getTestResult"
 import { getTestVersion } from "../../tasks/test"
@@ -53,10 +48,8 @@ export class GetTestResultCommand extends Command<Args> {
 
     printHeader(
       headerLog,
-      `Test result for test ${chalk.cyan(testName)} in module ${chalk.cyan(
-        moduleName,
-      )}`,
-      "heavy_check_mark",
+      `Test result for test ${chalk.cyan(testName)} in module ${chalk.cyan(moduleName)}`,
+      "heavy_check_mark"
     )
 
     const graph = await garden.getConfigGraph()
@@ -67,14 +60,11 @@ export class GetTestResultCommand extends Command<Args> {
     const testConfig = findByName(module.testConfigs, testName)
 
     if (!testConfig) {
-      throw new NotFoundError(
-        `Could not find test "${testName}" in module "${moduleName}"`,
-        {
-          moduleName,
-          testName,
-          availableTests: getNames(module.testConfigs),
-        },
-      )
+      throw new NotFoundError(`Could not find test "${testName}" in module "${moduleName}"`, {
+        moduleName,
+        testName,
+        availableTests: getNames(module.testConfigs),
+      })
     }
 
     const testVersion = await getTestVersion(garden, graph, module, testConfig)

@@ -48,7 +48,7 @@ interface GetLogsParams extends GetLogsBaseParams {
  * Stream all logs for the given pod names and service.
  */
 export async function getPodLogs(params: GetPodLogsParams) {
-  const procs = await Bluebird.map(params.podNames, podName => getLogs({ ...omit(params, "podNames"), podName }))
+  const procs = await Bluebird.map(params.podNames, (podName) => getLogs({ ...omit(params, "podNames"), podName }))
 
   return new Promise<GetServiceLogsResult>((resolve, reject) => {
     for (const proc of procs) {
@@ -72,12 +72,7 @@ export async function getAllLogs(params: GetAllLogsParams) {
 
 async function getLogs({ log, provider, namespace, service, stream, tail, follow, podName }: GetLogsParams) {
   // TODO: do this via API instead of kubectl
-  const kubectlArgs = [
-    "logs",
-    "--tail", String(tail),
-    "--timestamps=true",
-    "--all-containers=true",
-  ]
+  const kubectlArgs = ["logs", "--tail", String(tail), "--timestamps=true", "--all-containers=true"]
 
   if (follow) {
     kubectlArgs.push("--follow=true")
@@ -85,25 +80,28 @@ async function getLogs({ log, provider, namespace, service, stream, tail, follow
 
   kubectlArgs.push(`pod/${podName}`)
 
-  const proc = await kubectl.spawn({ log, provider, namespace, args: kubectlArgs })
+  const proc = await kubectl.spawn({
+    log,
+    provider,
+    namespace,
+    args: kubectlArgs,
+  })
   let timestamp: Date
 
-  proc.stdout!
-    .pipe(split())
-    .on("data", (s) => {
-      if (!s) {
-        return
-      }
-      const [timestampStr, msg] = splitFirst(s, " ")
-      try {
-        timestamp = moment(timestampStr).toDate()
-      } catch { }
-      void stream.write({
-        serviceName: service.name,
-        timestamp,
-        msg: `${podName} ${msg}`,
-      })
+  proc.stdout!.pipe(split()).on("data", (s) => {
+    if (!s) {
+      return
+    }
+    const [timestampStr, msg] = splitFirst(s, " ")
+    try {
+      timestamp = moment(timestampStr).toDate()
+    } catch {}
+    void stream.write({
+      serviceName: service.name,
+      timestamp,
+      msg: `${podName} ${msg}`,
     })
+  })
 
   return proc
 }

@@ -35,16 +35,17 @@ export const gardenPlugin = (): GardenPlugin => ({
     container: {
       getServiceStatus,
 
-      async deployService(
-        { ctx, module, service, runtimeContext, log }: DeployServiceParams<ContainerModule>,
-      ) {
+      async deployService({ ctx, module, service, runtimeContext, log }: DeployServiceParams<ContainerModule>) {
         // TODO: split this method up and test
         const { versionString } = service.module.version
 
-        log.info({ section: service.name, msg: `Deploying version ${versionString}` })
+        log.info({
+          section: service.name,
+          msg: `Deploying version ${versionString}`,
+        })
 
         const identifier = await containerHelpers.getLocalImageId(module)
-        const ports = service.spec.ports.map(p => {
+        const ports = service.spec.ports.map((p) => {
           const port: any = {
             Protocol: p.protocol ? p.protocol.toLowerCase() : "tcp",
             TargetPort: p.containerPort,
@@ -57,7 +58,7 @@ export const gardenPlugin = (): GardenPlugin => ({
 
         const envVars = map({ ...runtimeContext.envVars, ...service.spec.env }, (v, k) => `${k}=${v}`)
 
-        const volumeMounts = service.spec.volumes.map(v => {
+        const volumeMounts = service.spec.volumes.map((v) => {
           // TODO-LOW: Support named volumes
           if (v.hostPath) {
             return {
@@ -170,12 +171,17 @@ export const gardenPlugin = (): GardenPlugin => ({
           msg: `Ready`,
         })
 
-        return getServiceStatus({ ctx, module, service, runtimeContext, log, hotReload: false })
+        return getServiceStatus({
+          ctx,
+          module,
+          service,
+          runtimeContext,
+          log,
+          hotReload: false,
+        })
       },
 
-      async execInService(
-        { ctx, service, command, log }: ExecInServiceParams<ContainerModule>,
-      ) {
+      async execInService({ ctx, service, command, log }: ExecInServiceParams<ContainerModule>) {
         const status = await getServiceStatus({
           ctx,
           service,
@@ -199,9 +205,13 @@ export const gardenPlugin = (): GardenPlugin => ({
         // This is ugly, but dockerode doesn't have this, or at least it's too cumbersome to implement.
         const swarmServiceName = getSwarmServiceName(ctx, service.name)
         const servicePsCommand = [
-          "docker", "service", "ps",
-          "-f", `'name=${swarmServiceName}.1'`,
-          "-f", `'desired-state=running'`,
+          "docker",
+          "service",
+          "ps",
+          "-f",
+          `'name=${swarmServiceName}.1'`,
+          "-f",
+          `'desired-state=running'`,
           swarmServiceName,
           "-q",
         ]
@@ -313,7 +323,7 @@ async function getServiceTask(serviceId: string) {
     // Service: this.getSwarmServiceName(service.name),
   })
   // For whatever (presumably totally reasonable) reason, the filter option above does not work.
-  tasks = tasks.filter(t => t.ServiceID === serviceId)
+  tasks = tasks.filter((t) => t.ServiceID === serviceId)
   tasks = sortBy(tasks, ["CreatedAt"]).reverse()
 
   return tasks[0]

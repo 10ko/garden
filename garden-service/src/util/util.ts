@@ -23,11 +23,6 @@ import { createHash } from "crypto"
 import { tailString } from "./string"
 import { Writable } from "stream"
 
-// shim to allow async generator functions
-if (typeof (Symbol as any).asyncIterator === "undefined") {
-  (Symbol as any).asyncIterator = Symbol("asyncIterator")
-}
-
 export type HookCallback = (callback?: () => void) => void
 
 const exitHookNames: string[] = [] // For debugging/testing/inspection purposes
@@ -40,14 +35,18 @@ export type Diff<T, U> = T extends U ? never : T
 export type Nullable<T> = { [P in keyof T]: T[P] | null }
 // From: https://stackoverflow.com/a/49936686/5629940
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>>
-  : T[P] extends ReadonlyArray<infer V> ? ReadonlyArray<DeepPartial<V>>
-  : DeepPartial<T[P]>
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T[P] extends ReadonlyArray<infer V>
+    ? ReadonlyArray<DeepPartial<V>>
+    : DeepPartial<T[P]>
 }
-export type Unpacked<T> =
-  T extends (infer U)[] ? U
-  : T extends (...args: any[]) => infer V ? V
-  : T extends Promise<infer W> ? W
+export type Unpacked<T> = T extends (infer U)[]
+  ? U
+  : T extends (...args: any[]) => infer V
+  ? V
+  : T extends Promise<infer W>
+  ? W
   : T
 
 const MAX_BUFFER_SIZE = 1024 * 1024
@@ -68,7 +67,7 @@ export function getPackageVersion(): string {
 }
 
 export async function sleep(msec) {
-  return new Promise(resolve => setTimeout(resolve, msec))
+  return new Promise((resolve) => setTimeout(resolve, msec))
 }
 
 export interface SpawnOpts {
@@ -109,14 +108,17 @@ export function spawn(cmd: string, args: string[], opts: SpawnOpts = {}) {
 
   if (tty) {
     if (data) {
-      throw new ParameterError(`Cannot pipe to stdin when tty=true`, { cmd, args, opts })
+      throw new ParameterError(`Cannot pipe to stdin when tty=true`, {
+        cmd,
+        args,
+        opts,
+      })
     }
 
     _process.stdin.setEncoding("utf8")
 
     // raw mode is not available if we're running without a TTY
     _process.stdin.setRawMode && _process.stdin.setRawMode(true)
-
   } else {
     // We ensure the output strings never exceed the MAX_BUFFER_SIZE
     proc.stdout!.on("data", (s) => {
@@ -135,7 +137,7 @@ export function spawn(cmd: string, args: string[], opts: SpawnOpts = {}) {
 
     if (data) {
       // This may happen if the spawned process errors while we're still writing data.
-      proc.stdin!.on("error", () => { })
+      proc.stdin!.on("error", () => {})
 
       proc.stdin!.end(data)
     }
@@ -157,7 +159,13 @@ export function spawn(cmd: string, args: string[], opts: SpawnOpts = {}) {
     if (timeout > 0) {
       _timeout = setTimeout(() => {
         proc.kill("SIGKILL")
-        _reject(new TimeoutError(`${cmd} timed out after ${timeout} seconds.`, { cmd, args, opts }))
+        _reject(
+          new TimeoutError(`${cmd} timed out after ${timeout} seconds.`, {
+            cmd,
+            args,
+            opts,
+          })
+        )
       }, timeout * 1000)
     }
 
@@ -177,7 +185,10 @@ export function spawn(cmd: string, args: string[], opts: SpawnOpts = {}) {
         resolve(result)
       } else {
         const nLinesToShow = 100
-        const output = result.output.split("\n").slice(-nLinesToShow).join("\n")
+        const output = result.output
+          .split("\n")
+          .slice(-nLinesToShow)
+          .join("\n")
         const msg =
           `Command failed with code ${code}: ${cmd} ${args.join(" ")}\n\n` +
           `${result.stderr}\n` +
@@ -196,7 +207,7 @@ export async function dumpYaml(yamlPath, data) {
  * Encode multiple objects as one multi-doc YAML file
  */
 export function encodeYamlMulti(objects: object[]) {
-  return objects.map(s => safeDump(s, { noRefs: true }) + "---\n").join("")
+  return objects.map((s) => safeDump(s, { noRefs: true }) + "---\n").join("")
 }
 
 /**
@@ -227,12 +238,13 @@ export function splitLast(s: string, delimiter: string) {
  * walking through all object keys _and array items_.
  */
 export function deepMap<T extends object, U extends object = T>(
-  value: T | Iterable<T>, fn: (value: any, key: string | number) => any,
+  value: T | Iterable<T>,
+  fn: (value: any, key: string | number) => any
 ): U | Iterable<U> {
   if (isArray(value)) {
-    return value.map(v => <U>deepMap(v, fn))
+    return value.map((v) => <U>deepMap(v, fn))
   } else if (isPlainObject(value)) {
-    return <U>mapValues(value, v => deepMap(v, fn))
+    return <U>mapValues(value, (v) => deepMap(v, fn))
   } else {
     return <U>fn(value, 0)
   }
@@ -243,12 +255,13 @@ export function deepMap<T extends object, U extends object = T>(
  * walking through all object keys _and array items_.
  */
 export function deepFilter<T extends object, U extends object = T>(
-  value: T | Iterable<T>, fn: (value: any, key: string | number) => boolean,
+  value: T | Iterable<T>,
+  fn: (value: any, key: string | number) => boolean
 ): U | Iterable<U> {
   if (isArray(value)) {
-    return <Iterable<U>>value.filter(fn).map(v => deepFilter(v, fn))
+    return <Iterable<U>>value.filter(fn).map((v) => deepFilter(v, fn))
   } else if (isPlainObject(value)) {
-    return <U>mapValues(pickBy(<U>value, fn), v => deepFilter(v, fn))
+    return <U>mapValues(pickBy(<U>value, fn), (v) => deepFilter(v, fn))
   } else {
     return <U>value
   }
@@ -259,7 +272,7 @@ export function deepFilter<T extends object, U extends object = T>(
  * walking through all object keys and array items.
  */
 export async function deepResolve<T>(
-  value: T | Iterable<T> | Iterable<PromiseLike<T>> | ResolvableProps<T>,
+  value: T | Iterable<T> | Iterable<PromiseLike<T>> | ResolvableProps<T>
 ): Promise<T | Iterable<T> | { [K in keyof T]: T[K] }> {
   if (isArray(value)) {
     return await Bluebird.map(value, deepResolve)
@@ -275,17 +288,21 @@ export async function deepResolve<T>(
  * walking through all object keys and array items.
  */
 export async function asyncDeepMap<T>(
-  obj: T, mapper: (value) => Promise<any>, options?: Bluebird.ConcurrencyOption,
+  obj: T,
+  mapper: (value) => Promise<any>,
+  options?: Bluebird.ConcurrencyOption
 ): Promise<T> {
   if (isArray(obj)) {
-    return <any>Bluebird.map(obj, v => asyncDeepMap(v, mapper, options), options)
+    return <any>Bluebird.map(obj, (v) => asyncDeepMap(v, mapper, options), options)
   } else if (isPlainObject(obj)) {
-    return <T>fromPairs(
-      await Bluebird.map(
-        Object.entries(obj),
-        async ([key, value]) => [key, await asyncDeepMap(value, mapper, options)],
-        options,
-      ),
+    return <T>(
+      fromPairs(
+        await Bluebird.map(
+          Object.entries(obj),
+          async ([key, value]) => [key, await asyncDeepMap(value, mapper, options)],
+          options
+        )
+      )
     )
   } else {
     return mapper(obj)
@@ -301,7 +318,7 @@ export function omitUndefined(o: object) {
  * values from arrays. Note: Also iterates through arrays recursively.
  */
 export function deepOmitUndefined(obj: object) {
-  return deepFilter(obj, v => v !== undefined)
+  return deepFilter(obj, (v) => v !== undefined)
 }
 
 export function serializeObject(o: any): string {
@@ -321,7 +338,7 @@ export function deserializeValues(o: object) {
 }
 
 export function getEnumKeys(Enum) {
-  return Object.values(Enum).filter(k => typeof k === "string") as string[]
+  return Object.values(Enum).filter((k) => typeof k === "string") as string[]
 }
 
 export function highlightYaml(s: string) {
@@ -345,7 +362,7 @@ export interface ObjectWithName {
 }
 
 export function getNames<T extends ObjectWithName>(array: T[]) {
-  return array.map(v => v.name)
+  return array.map((v) => v.name)
 }
 
 export function findByName<T extends ObjectWithName>(array: T[], name: string): T | undefined {
@@ -353,7 +370,7 @@ export function findByName<T extends ObjectWithName>(array: T[], name: string): 
 }
 
 export function uniqByName<T extends ObjectWithName>(array: T[]): T[] {
-  return uniqBy(array, item => item.name)
+  return uniqBy(array, (item) => item.name)
 }
 
 /**

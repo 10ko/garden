@@ -8,14 +8,7 @@
 
 import { map as bluebirdMap } from "bluebird"
 import normalize = require("normalize-path")
-import {
-  isAbsolute,
-  join,
-  parse,
-  resolve,
-  sep,
-  relative,
-} from "path"
+import { isAbsolute, join, parse, resolve, sep, relative } from "path"
 import { emptyDir, ensureDir } from "fs-extra"
 import { ConfigurationError } from "./exceptions"
 import { FileCopySpec, Module, getModuleKey } from "./types/module"
@@ -27,7 +20,7 @@ import { LogEntry } from "./logger/log-entry"
 // Lazily construct a directory of modules inside which all build steps are performed.
 
 export class BuildDir {
-  constructor(private projectRoot: string, public buildDirPath: string, public buildMetadataDirPath: string) { }
+  constructor(private projectRoot: string, public buildDirPath: string, public buildMetadataDirPath: string) {}
 
   static async factory(projectRoot: string, gardenDirPath: string) {
     const buildDirPath = join(gardenDirPath, "build")
@@ -40,7 +33,7 @@ export class BuildDir {
   async syncFromSrc(module: Module, log: LogEntry) {
     const files = module.version.files
       // Normalize to relative POSIX-style paths
-      .map(f => normalize(isAbsolute(f) ? relative(module.path, f) : f))
+      .map((f) => normalize(isAbsolute(f) ? relative(module.path, f) : f))
 
     await this.sync({
       module,
@@ -80,7 +73,13 @@ export class BuildDir {
 
         const sourcePath = join(sourceBuildPath, copy.source)
         const destinationPath = join(buildPath, copy.target)
-        return this.sync({ module, sourcePath, destinationPath, withDelete: false, log })
+        return this.sync({
+          module,
+          sourcePath,
+          destinationPath,
+          withDelete: false,
+          log,
+        })
       })
     })
   }
@@ -110,17 +109,21 @@ export class BuildDir {
    *
    * If withDelete = true, files/folders in destinationPath that are not in sourcePath will also be deleted.
    */
-  private async sync(
-    { module, sourcePath, destinationPath, withDelete, log, files }:
-      {
-        module: Module,
-        sourcePath: string,
-        destinationPath: string,
-        withDelete: boolean,
-        log: LogEntry,
-        files?: string[],
-      },
-  ): Promise<void> {
+  private async sync({
+    module,
+    sourcePath,
+    destinationPath,
+    withDelete,
+    log,
+    files,
+  }: {
+    module: Module
+    sourcePath: string
+    destinationPath: string
+    withDelete: boolean
+    log: LogEntry
+    files?: string[]
+  }): Promise<void> {
     const destinationDir = parse(destinationPath).dir
     await ensureDir(destinationDir)
 
@@ -139,7 +142,8 @@ export class BuildDir {
       syncOpts.push("--delete")
     }
 
-    let logMsg = `Syncing ${module.version.files.length} files from ` +
+    let logMsg =
+      `Syncing ${module.version.files.length} files from ` +
       `${relative(this.projectRoot, sourcePath)} to ${relative(this.projectRoot, destinationPath)}`
 
     if (withDelete) {

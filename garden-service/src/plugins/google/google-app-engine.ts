@@ -9,11 +9,7 @@
 import { ServiceStatus } from "../../types/service"
 import { join } from "path"
 import { gcloud } from "./common"
-import {
-  getEnvironmentStatus,
-  GOOGLE_CLOUD_DEFAULT_REGION,
-  prepareEnvironment,
-} from "./common"
+import { getEnvironmentStatus, GOOGLE_CLOUD_DEFAULT_REGION, prepareEnvironment } from "./common"
 import { dumpYaml } from "../../util/util"
 import { GardenPlugin } from "../../types/plugin/plugin"
 import { configureContainerModule } from "../container/container"
@@ -24,7 +20,8 @@ import { DeployServiceParams } from "../../types/plugin/service/deployService"
 import { joi } from "../../config/common"
 
 const configSchema = providerConfigBaseSchema.keys({
-  project: joi.string()
+  project: joi
+    .string()
     .required()
     .description("The GCP project to deploy containers to."),
 })
@@ -45,7 +42,7 @@ export const gardenPlugin = (): GardenPlugin => ({
         const endpoint = `https://${GOOGLE_CLOUD_DEFAULT_REGION}-${project}.cloudfunctions.net/${config.name}`
 
         config.outputs = {
-          ...config.outputs || {},
+          ...(config.outputs || {}),
           endpoint,
         }
 
@@ -98,9 +95,9 @@ export const gardenPlugin = (): GardenPlugin => ({
         // deploy to GAE
         const project = ctx.provider.config.project
 
-        await gcloud(project).call([
-          "app", "deploy", "--quiet",
-        ], { cwd: service.module.path })
+        await gcloud(project).call(["app", "deploy", "--quiet"], {
+          cwd: service.module.path,
+        })
 
         log.info({ section: service.name, msg: `App deployed` })
 

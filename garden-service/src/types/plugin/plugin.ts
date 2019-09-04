@@ -56,8 +56,7 @@ export type ModuleActions<T extends Module = Module> = {
   [P in keyof ModuleActionParams<T>]: (params: ModuleActionParams<T>[P]) => ModuleActionOutputs[P]
 }
 
-export type ModuleAndRuntimeActions<T extends Module = Module> =
-  ModuleActions<T> & ServiceActions<T> & TaskActions<T>
+export type ModuleAndRuntimeActions<T extends Module = Module> = ModuleActions<T> & ServiceActions<T> & TaskActions<T>
 
 export type PluginActionName = keyof PluginActions
 export type ServiceActionName = keyof ServiceActions
@@ -103,7 +102,9 @@ export type PluginActions = {
   [P in keyof PluginActionParams]: (params: PluginActionParams[P]) => PluginActionOutputs[P]
 }
 
-export const pluginActionDescriptions: { [P in PluginActionName]: PluginActionDescription } = {
+export const pluginActionDescriptions: {
+  [P in PluginActionName]: PluginActionDescription
+} = {
   configureProvider,
   getEnvironmentStatus,
   prepareEnvironment,
@@ -140,7 +141,9 @@ export interface ServiceActionOutputs {
   stopPortForward: Promise<{}>
 }
 
-export const serviceActionDescriptions: { [P in ServiceActionName]: PluginActionDescription } = {
+export const serviceActionDescriptions: {
+  [P in ServiceActionName]: PluginActionDescription
+} = {
   deployService,
   deleteService,
   execInService,
@@ -162,13 +165,15 @@ export interface TaskActionOutputs {
   getTaskResult: Promise<RunTaskResult | null>
 }
 
-export const taskActionDescriptions: { [P in TaskActionName]: PluginActionDescription } = {
+export const taskActionDescriptions: {
+  [P in TaskActionName]: PluginActionDescription
+} = {
   getTaskResult,
   runTask,
 }
 
 export interface ModuleActionParams<T extends Module = Module> {
-  describeType: DescribeModuleTypeParams,
+  describeType: DescribeModuleTypeParams
   configure: ConfigureModuleParams<T>
   getBuildStatus: GetBuildStatusParams<T>
   build: BuildModuleParams<T>
@@ -189,8 +194,9 @@ export interface ModuleActionOutputs extends ServiceActionOutputs {
   getTestResult: Promise<TestResult | null>
 }
 
-export const moduleActionDescriptions:
-  { [P in ModuleActionName | ServiceActionName | TaskActionName]: PluginActionDescription } = {
+export const moduleActionDescriptions: {
+  [P in ModuleActionName | ServiceActionName | TaskActionName]: PluginActionDescription
+} = {
   describeType,
   configure,
   getBuildStatus,
@@ -208,9 +214,9 @@ export const pluginActionNames: PluginActionName[] = <PluginActionName[]>Object.
 export const moduleActionNames: ModuleActionName[] = <ModuleActionName[]>Object.keys(moduleActionDescriptions)
 
 export interface GardenPlugin {
-  configSchema?: Joi.ObjectSchema,
+  configSchema?: Joi.ObjectSchema
   configKeys?: string[]
-  outputsSchema?: Joi.ObjectSchema,
+  outputsSchema?: Joi.ObjectSchema
 
   dependencies?: string[]
 
@@ -221,8 +227,8 @@ export interface GardenPlugin {
 }
 
 export interface PluginFactoryParams {
-  log: LogNode,
-  projectName: string,
+  log: LogNode
+  projectName: string
 }
 
 export interface PluginFactory {
@@ -233,34 +239,57 @@ export interface Plugins {
   [name: string]: RegisterPluginParam
 }
 
-export const pluginSchema = joi.object()
+export const pluginSchema = joi
+  .object()
   .keys({
     // TODO: make this a JSON/OpenAPI schema for portability
-    configSchema: joi.object({ isJoi: joi.boolean().only(true).required() }).unknown(true),
-    outputsSchema: joi.object({ isJoi: joi.boolean().only(true).required() }).unknown(true),
-    dependencies: joiArray(joi.string())
-      .description(deline`
+    configSchema: joi
+      .object({
+        isJoi: joi
+          .boolean()
+          .only(true)
+          .required(),
+      })
+      .unknown(true),
+    outputsSchema: joi
+      .object({
+        isJoi: joi
+          .boolean()
+          .only(true)
+          .required(),
+      })
+      .unknown(true),
+    dependencies: joiArray(joi.string()).description(deline`
         Names of plugins that need to be configured prior to this plugin. This plugin will be able to reference the
         configuration from the listed plugins. Note that the dependencies will not be implicitly configured—the user
         will need to explicitly configure them in their project configuration.
       `),
     // TODO: document plugin actions further
-    actions: joi.object().keys(mapValues(pluginActionDescriptions, () => joi.func()))
+    actions: joi
+      .object()
+      .keys(mapValues(pluginActionDescriptions, () => joi.func()))
       .description("A map of plugin action handlers provided by the plugin."),
     moduleActions: joiIdentifierMap(
-      joi.object().keys(mapValues(moduleActionDescriptions, () => joi.func()),
-      ).description("A map of module names and module action handlers provided by the plugin."),
+      joi
+        .object()
+        .keys(mapValues(moduleActionDescriptions, () => joi.func()))
+        .description("A map of module names and module action handlers provided by the plugin.")
     ),
-    commands: joi.array().items(pluginCommandSchema)
+    commands: joi
+      .array()
+      .items(pluginCommandSchema)
       .unique("name")
-      .description("List of commands that this plugin exposes (via \`garden plugins <plugin name>\`"),
+      .description("List of commands that this plugin exposes (via `garden plugins <plugin name>`"),
   })
   .description("The schema for Garden plugins.")
 
-export const pluginModuleSchema = joi.object()
+export const pluginModuleSchema = joi
+  .object()
   .keys({
     name: joiIdentifier(),
-    gardenPlugin: joi.func().required()
+    gardenPlugin: joi
+      .func()
+      .required()
       .description("The initialization function for the plugin. Should return a valid Garden plugin object."),
   })
   .unknown(true)

@@ -44,7 +44,11 @@ export function getDuration(start: string | Date, end: string | Date): string {
 export const truncateMiddle = (str: string, resLength: number = 35) => {
   if (str.length > resLength) {
     const middle = Math.ceil(resLength / 2)
-    return str.substr(0, middle) + "..." + str.substr(str.length - middle, str.length)
+    return (
+      str.substr(0, middle) +
+      "..." +
+      str.substr(str.length - middle, str.length)
+    )
   }
 
   return str

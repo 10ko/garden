@@ -34,8 +34,8 @@ const Ingresses = styled.div`
   }
 `
 const LinkContainer = styled.div`
-  padding-top: .25rem;
-  font-size: .75rem;
+  padding-top: 0.25rem;
+  font-size: 0.75rem;
 
   &:last-of-type {
     padding-bottom: 0;
@@ -43,12 +43,14 @@ const LinkContainer = styled.div`
 `
 
 const getIngressUrl = (ingress: ServiceIngress) => {
-  return normalizeUrl(format({
-    protocol: ingress.protocol,
-    hostname: ingress.hostname,
-    port: ingress.port,
-    pathname: ingress.path,
-  }))
+  return normalizeUrl(
+    format({
+      protocol: ingress.protocol,
+      hostname: ingress.hostname,
+      port: ingress.port,
+      pathname: ingress.path,
+    })
+  )
 }
 
 interface IngressesProp {
@@ -56,9 +58,11 @@ interface IngressesProp {
 }
 
 export default ({ ingresses }: IngressesProp) => {
-  const { actions: { selectIngress } } = useContext(UiStateContext)
+  const {
+    actions: { selectIngress },
+  } = useContext(UiStateContext)
 
-  const handleSelectIngress = (event) => {
+  const handleSelectIngress = event => {
     if (ingresses && ingresses.length) {
       const ingress = ingresses.find(i => i.path === event.target.id)
       if (ingress) {
@@ -69,12 +73,12 @@ export default ({ ingresses }: IngressesProp) => {
 
   return (
     <Ingresses>
-      {(ingresses || []).map((ingress) => {
+      {(ingresses || []).map(ingress => {
         const url = getIngressUrl(ingress)
         return (
           <LinkContainer key={ingress.path}>
             <div className="visible-lg-block">
-              <ExternalLink id={ingress.path} onClick={handleSelectIngress} >
+              <ExternalLink id={ingress.path} onClick={handleSelectIngress}>
                 {truncateMiddle(url)}
               </ExternalLink>
             </div>

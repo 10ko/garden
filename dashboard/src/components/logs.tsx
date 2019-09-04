@@ -31,7 +31,7 @@ interface Props {
 
 interface State {
   loading: boolean
-  selectedService: { value: string, label: string }
+  selectedService: { value: string; label: string }
 }
 
 const Header = styled.div`
@@ -55,12 +55,13 @@ const selectStyles = {
     color: colors.gardenBlack,
     backgroundColor: state.isSelected
       ? colors.gardenGreenDark
-      : state.isFocused ? colors.gardenGreenLight : colors.gardenWhite,
+      : state.isFocused
+      ? colors.gardenGreenLight
+      : colors.gardenWhite,
   }),
 }
 
 class Logs extends Component<Props, State> {
-
   constructor(props) {
     super(props)
 
@@ -93,20 +94,25 @@ class Logs extends Component<Props, State> {
     const { loading, selectedService } = this.state
     const serviceNames = getServiceNames(config.moduleConfigs)
     const maxServiceName = (max(serviceNames) || []).length
-    const options = [{ value: "all", label: "All service logs" }]
-      .concat(serviceNames.map(name => ({ value: name, label: name })))
+    const options = [{ value: "all", label: "All service logs" }].concat(
+      serviceNames.map(name => ({ value: name, label: name }))
+    )
 
     const { value, label } = selectedService
     const title = value === "all" ? label : `${label} logs`
-    const filteredLogs = value === "all" ? logs : logs.filter(l => l.serviceName === value)
+    const filteredLogs =
+      value === "all" ? logs : logs.filter(l => l.serviceName === value)
 
     return (
       <div className="pl-1">
         <div
-          className={cls(css`
-            min-width: 12rem;
-            width: 30%;
-          `, "mb-1")}
+          className={cls(
+            css`
+              min-width: 12rem;
+              width: 30%;
+            `,
+            "mb-1"
+          )}
         >
           <Select
             value={this.state.selectedService}
@@ -135,7 +141,6 @@ class Logs extends Component<Props, State> {
       </div>
     )
   }
-
 }
 
 export default Logs

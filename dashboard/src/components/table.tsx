@@ -33,7 +33,7 @@ const Td = styled.td`
 
 const Tr = styled.tr`
   :hover {
-    background-color: ${colors.gardenGreenLight}
+    background-color: ${colors.gardenGreenLight};
   }
 `
 
@@ -67,9 +67,7 @@ const Table: React.FC<Props> = props => (
         {props.rows.map((row, idx) => (
           <Tr key={idx}>
             {row.map((col, cidx) => {
-              return (
-                <Td key={cidx}>{col}</Td>
-              )
+              return <Td key={cidx}>{col}</Td>
             })}
           </Tr>
         ))}

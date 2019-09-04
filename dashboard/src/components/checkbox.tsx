@@ -18,7 +18,7 @@ const Label = styled.label`
   cursor: pointer;
   font-size: 1rem;
   user-select: none;
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
   height: 1rem;
   line-height: 1rem;
 `

@@ -17,24 +17,40 @@ import { Extends } from "garden-service/build/src/util/util"
 
 // FIXME: We shouldn't repeat the keys for both the type and the set below
 export type SupportedEventName = Extends<
-  EventName, "taskPending" | "taskProcessing" | "taskComplete" | "taskGraphComplete" | "taskError" | "taskCancelled"
+  EventName,
+  | "taskPending"
+  | "taskProcessing"
+  | "taskComplete"
+  | "taskGraphComplete"
+  | "taskError"
+  | "taskCancelled"
 >
 
-export const supportedEventNames: Set<SupportedEventName> = new Set(
-  ["taskPending", "taskProcessing", "taskComplete", "taskGraphComplete", "taskError", "taskCancelled"],
-)
+export const supportedEventNames: Set<SupportedEventName> = new Set([
+  "taskPending",
+  "taskProcessing",
+  "taskComplete",
+  "taskGraphComplete",
+  "taskError",
+  "taskCancelled",
+])
 
 export type WsEventMessage = ServerWebsocketMessage & {
-  type: "event",
-  name: SupportedEventName,
-  payload: Events[SupportedEventName],
+  type: "event"
+  name: SupportedEventName
+  payload: Events[SupportedEventName]
 }
 
 /**
  * Type guard to check whether websocket message is a type supported by the Dashboard
  */
-function isSupportedEvent(data: ServerWebsocketMessage): data is WsEventMessage {
-  return data.type === "event" && supportedEventNames.has((data as WsEventMessage).name)
+function isSupportedEvent(
+  data: ServerWebsocketMessage
+): data is WsEventMessage {
+  return (
+    data.type === "event" &&
+    supportedEventNames.has((data as WsEventMessage).name)
+  )
 }
 
 type Context = { message?: WsEventMessage }

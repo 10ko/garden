@@ -12,14 +12,18 @@ import Graph from "../components/graph"
 import PageError from "../components/page-error"
 import { EventContext } from "../context/events"
 import { DataContext } from "../context/data"
-import { UiStateContext, StackGraphSupportedFilterKeys, EntityResultSupportedTypes } from "../context/ui"
+import {
+  UiStateContext,
+  StackGraphSupportedFilterKeys,
+  EntityResultSupportedTypes,
+} from "../context/ui"
 import EntityResult from "./entity-result"
 import Spinner from "../components/spinner"
 import { Filters } from "../components/group-filter"
 import { capitalize } from "lodash"
 
 const Wrapper = styled.div`
-padding-left: .75rem;
+  padding-left: 0.75rem;
 `
 
 export default () => {
@@ -33,8 +37,16 @@ export default () => {
   useEffect(loadGraph, [])
 
   const {
-    actions: { selectGraphNode, stackGraphToggleItemsView, clearGraphNodeSelection },
-    state: { selectedGraphNode, isSidebarOpen, stackGraph: { filters } },
+    actions: {
+      selectGraphNode,
+      stackGraphToggleItemsView,
+      clearGraphNodeSelection,
+    },
+    state: {
+      selectedGraphNode,
+      isSidebarOpen,
+      stackGraph: { filters },
+    },
   } = useContext(UiStateContext)
 
   if (config.error || graph.error) {
@@ -45,7 +57,9 @@ export default () => {
     return <Spinner />
   }
   if (message && message.type === "event") {
-    const nodeToUpdate = graph.data.nodes.find(node => node.key === (message.payload && message.payload["key"]))
+    const nodeToUpdate = graph.data.nodes.find(
+      node => node.key === (message.payload && message.payload["key"])
+    )
     if (nodeToUpdate) {
       nodeToUpdate.status = message.name
       graph.data = { ...graph.data }
@@ -69,22 +83,33 @@ export default () => {
     }
   }
 
-  const createFiltersState =
-    (allGroupFilters, type): Filters<StackGraphSupportedFilterKeys> => {
-      return ({
-        ...allGroupFilters,
-        [type]: {
-          label: capitalize(type),
-          selected: filters[type],
-        },
-      })
+  const createFiltersState = (
+    allGroupFilters,
+    type
+  ): Filters<StackGraphSupportedFilterKeys> => {
+    return {
+      ...allGroupFilters,
+      [type]: {
+        label: capitalize(type),
+        selected: filters[type],
+      },
     }
+  }
 
-  const graphFilters = Object.keys(filters).reduce(createFiltersState, {}) as Filters<StackGraphSupportedFilterKeys>
+  const graphFilters = Object.keys(filters).reduce(
+    createFiltersState,
+    {}
+  ) as Filters<StackGraphSupportedFilterKeys>
 
   return (
     <Wrapper className="row">
-      <div className={moreInfoPane ? "col-xs-7 col-sm-7 col-md-8 col-lg-8 col-xl-8" : "col-xs"}>
+      <div
+        className={
+          moreInfoPane
+            ? "col-xs-7 col-sm-7 col-md-8 col-lg-8 col-xl-8"
+            : "col-xs"
+        }
+      >
         <Graph
           onGraphNodeSelected={selectGraphNode}
           selectedGraphNode={selectedGraphNode}

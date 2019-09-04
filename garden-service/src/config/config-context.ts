@@ -36,7 +36,10 @@ export interface ContextResolveParams {
 
 export function schema(joiSchema: Joi.Schema) {
   return (target, propName) => {
-    target.constructor._schemas = { ...target.constructor._schemas || {}, [propName]: joiSchema }
+    target.constructor._schemas = {
+      ...(target.constructor._schemas || {}),
+      [propName]: joiSchema,
+    }
   }
 }
 
@@ -52,7 +55,10 @@ export abstract class ConfigContext {
 
   static getSchema() {
     const schemas = (<any>this)._schemas
-    return joi.object().keys(schemas).required()
+    return joi
+      .object()
+      .keys(schemas)
+      .required()
   }
 
   async resolve({ key, nodePath, opts }: ContextResolveParams): Promise<Primitive | undefined> {
@@ -66,7 +72,7 @@ export abstract class ConfigContext {
       return resolved
     }
 
-    opts.stack = [...opts.stack || []]
+    opts.stack = [...(opts.stack || [])]
 
     if (opts.stack.includes(fullPath)) {
       throw new ConfigurationError(
@@ -75,7 +81,7 @@ export abstract class ConfigContext {
           nodePath,
           fullPath,
           opts,
-        },
+        }
       )
     }
 
@@ -104,7 +110,7 @@ export abstract class ConfigContext {
               nodePath,
               fullPath,
               opts,
-            },
+            }
           )
         }
 
@@ -115,7 +121,11 @@ export abstract class ConfigContext {
       // handle nested contexts
       if (value instanceof ConfigContext) {
         opts.stack.push(stackEntry)
-        value = await value.resolve({ key: remainder, nodePath: nestedNodePath, opts })
+        value = await value.resolve({
+          key: remainder,
+          nodePath: nestedNodePath,
+          opts,
+        })
         break
       }
 
@@ -149,7 +159,7 @@ export abstract class ConfigContext {
           value,
           path,
           fullPath,
-        },
+        }
       )
     }
 
@@ -164,7 +174,7 @@ export class ScanContext extends ConfigContext {
 
   constructor() {
     super()
-    this.foundKeys = new KeyedSet<string[]>(v => v.join("."))
+    this.foundKeys = new KeyedSet<string[]>((v) => v.join("."))
   }
 
   async resolve({ key, nodePath }: ContextResolveParams) {
@@ -177,27 +187,27 @@ export class ScanContext extends ConfigContext {
 class LocalContext extends ConfigContext {
   @schema(
     joiStringMap(joi.string()).description(
-      "A map of all local environment variables (see https://nodejs.org/api/process.html#process_process_env).",
-    ),
+      "A map of all local environment variables (see https://nodejs.org/api/process.html#process_process_env)."
+    )
   )
   public env: typeof process.env
 
   @schema(
-    joi.string()
+    joi
+      .string()
       .description(
         "A string indicating the platform that the framework is running on " +
-        "(see https://nodejs.org/api/process.html#process_process_platform)",
+          "(see https://nodejs.org/api/process.html#process_process_platform)"
       )
-      .example("posix"),
+      .example("posix")
   )
   public platform: string
 
   @schema(
-    joi.string()
-      .description(
-        "The current username (as resolved by https://github.com/sindresorhus/username)",
-      )
-      .example("tenzing_norgay"),
+    joi
+      .string()
+      .description("The current username (as resolved by https://github.com/sindresorhus/username)")
+      .example("tenzing_norgay")
   )
   public username: () => Promise<string>
 
@@ -230,9 +240,10 @@ export class ProjectConfigContext extends ConfigContext {
 
 class ProjectContext extends ConfigContext {
   @schema(
-    joi.string()
+    joi
+      .string()
       .description("The name of the Garden project.")
-      .example("my-project"),
+      .example("my-project")
   )
   public name: string
 
@@ -244,9 +255,10 @@ class ProjectContext extends ConfigContext {
 
 class EnvironmentContext extends ConfigContext {
   @schema(
-    joi.string()
+    joi
+      .string()
       .description("The name of the environment Garden is running against.")
-      .example("local"),
+      .example("local")
   )
   public name: string
 
@@ -256,20 +268,23 @@ class EnvironmentContext extends ConfigContext {
   }
 }
 
-const providersExample = { kubernetes: { config: { clusterHostname: "my-cluster.example.com" } } }
+const providersExample = {
+  kubernetes: { config: { clusterHostname: "my-cluster.example.com" } },
+}
 
 class ProviderContext extends ConfigContext {
   @schema(
-    joi.object()
+    joi
+      .object()
       .description("The resolved configuration for the provider.")
-      .example(providersExample.kubernetes),
+      .example(providersExample.kubernetes)
   )
   public config: ProviderConfig
 
   @schema(
     joiIdentifierMap(joiPrimitive())
       .description("The outputs defined by the provider (see individual plugin docs for details).")
-      .example({ "cluster-ip": "1.2.3.4" }),
+      .example({ "cluster-ip": "1.2.3.4" })
   )
   public outputs: PrimitiveMap
 
@@ -282,21 +297,17 @@ class ProviderContext extends ConfigContext {
 
 export class ProviderConfigContext extends ProjectConfigContext {
   @schema(
-    EnvironmentContext.getSchema()
-      .description("Information about the environment that Garden is running against."),
+    EnvironmentContext.getSchema().description("Information about the environment that Garden is running against.")
   )
   public environment: EnvironmentContext
 
-  @schema(
-    ProjectContext.getSchema()
-      .description("Information about the Garden project."),
-  )
+  @schema(ProjectContext.getSchema().description("Information about the Garden project."))
   public project: ProjectContext
 
   @schema(
     joiIdentifierMap(ProviderContext.getSchema())
       .description("Retrieve information about providers that are defined in the project.")
-      .example(providersExample),
+      .example(providersExample)
   )
   public providers: Map<string, ProviderContext>
 
@@ -307,9 +318,9 @@ export class ProviderConfigContext extends ProjectConfigContext {
     this.environment = new EnvironmentContext(this, environmentName)
     this.project = new ProjectContext(this, projectName)
 
-    this.providers = new Map(resolvedProviders.map(p =>
-      <[string, ProviderContext]>[p.name, new ProviderContext(_this, p)],
-    ))
+    this.providers = new Map(
+      resolvedProviders.map((p) => <[string, ProviderContext]>[p.name, new ProviderContext(_this, p)])
+    )
   }
 }
 
@@ -318,10 +329,11 @@ const exampleVersion = "v-17ad4cb3fd"
 
 export class ModuleContext extends ConfigContext {
   @schema(
-    joi.string()
+    joi
+      .string()
       .required()
       .description("The build path of the module.")
-      .example("/home/me/code/my-project/.garden/build/my-module"),
+      .example("/home/me/code/my-project/.garden/build/my-module")
   )
   public buildPath: string
 
@@ -330,25 +342,27 @@ export class ModuleContext extends ConfigContext {
       .required()
       .description(
         "The outputs defined by the module (see individual module type " +
-        "[references](https://docs.garden.io/reference/module-types) for details).",
+          "[references](https://docs.garden.io/reference/module-types) for details)."
       )
-      .example(exampleOutputs),
+      .example(exampleOutputs)
   )
   public outputs: PrimitiveMap
 
   @schema(
-    joi.string()
+    joi
+      .string()
       .required()
       .description("The local path of the module.")
-      .example("/home/me/code/my-project/my-module"),
+      .example("/home/me/code/my-project/my-module")
   )
   public path: string
 
   @schema(
-    joi.string()
+    joi
+      .string()
       .required()
       .description("The current version of the module.")
-      .example(exampleVersion),
+      .example(exampleVersion)
   )
   public version: string
 
@@ -374,9 +388,9 @@ export class ServiceRuntimeContext extends ConfigContext {
       .required()
       .description(
         "The runtime outputs defined by the service (see individual module type " +
-        "[references](https://docs.garden.io/reference/module-types) for details).",
+          "[references](https://docs.garden.io/reference/module-types) for details)."
       )
-      .example({ "some-key": "some value" }),
+      .example({ "some-key": "some value" })
   )
   public outputs: PrimitiveMap
 
@@ -388,7 +402,7 @@ export class ServiceRuntimeContext extends ConfigContext {
   async resolve(params: ContextResolveParams) {
     // We're customizing the resolver so that we can ignore missing service/task outputs, but fail when an output
     // on a resolved service/task doesn't exist.
-    const opts = { ...params.opts || {}, allowUndefined: false }
+    const opts = { ...(params.opts || {}), allowUndefined: false }
     return super.resolve({ ...params, opts })
   }
 }
@@ -399,9 +413,9 @@ export class TaskRuntimeContext extends ServiceRuntimeContext {
       .required()
       .description(
         "The runtime outputs defined by the task (see individual module type " +
-        "[references](https://docs.garden.io/reference/module-types) for details).",
+          "[references](https://docs.garden.io/reference/module-types) for details)."
       )
-      .example({ "some-key": "some value" }),
+      .example({ "some-key": "some value" })
   )
   public outputs: PrimitiveMap
 }
@@ -411,7 +425,7 @@ class RuntimeConfigContext extends ConfigContext {
     joiIdentifierMap(ServiceRuntimeContext.getSchema())
       .required()
       .description("Runtime information from the services that the service/task being run depends on.")
-      .example({ "my-service": { outputs: { "some-key": "some value" } } }),
+      .example({ "my-service": { outputs: { "some-key": "some value" } } })
   )
   public services: Map<string, ServiceRuntimeContext>
 
@@ -419,7 +433,7 @@ class RuntimeConfigContext extends ConfigContext {
     joiIdentifierMap(TaskRuntimeContext.getSchema())
       .required()
       .description("Runtime information from the tasks that the service/task being run depends on.")
-      .example({ "my-task": { outputs: { "some-key": "some value" } } }),
+      .example({ "my-task": { outputs: { "some-key": "some value" } } })
   )
   public tasks: Map<string, TaskRuntimeContext>
 
@@ -443,7 +457,7 @@ class RuntimeConfigContext extends ConfigContext {
   async resolve(params: ContextResolveParams) {
     // We're customizing the resolver so that we can ignore missing services/tasks and return the template string back
     // for later resolution, but fail when an output on a resolved service/task doesn't exist.
-    const opts = { ...params.opts || {}, allowUndefined: true }
+    const opts = { ...(params.opts || {}), allowUndefined: true }
     const res = await super.resolve({ ...params, opts })
 
     if (res === undefined) {
@@ -464,30 +478,29 @@ export class ModuleConfigContext extends ProviderConfigContext {
   @schema(
     joiIdentifierMap(ModuleContext.getSchema())
       .description("Retrieve information about modules that are defined in the project.")
-      .example({ "my-module": exampleModule }),
+      .example({ "my-module": exampleModule })
   )
   public modules: Map<string, () => Promise<ModuleContext>>
 
   @schema(
-    RuntimeConfigContext.getSchema()
-      .description(
-        "Runtime outputs and information from services and tasks " +
-        "(only resolved at runtime when deploying services and running tasks).",
-      ),
+    RuntimeConfigContext.getSchema().description(
+      "Runtime outputs and information from services and tasks " +
+        "(only resolved at runtime when deploying services and running tasks)."
+    )
   )
   public runtime: RuntimeConfigContext
 
   @schema(
     joiIdentifierMap(joiPrimitive())
       .description("A map of all variables defined in the project configuration.")
-      .example({ "team-name": "bananaramallama", "some-service-endpoint": "https://someservice.com/api/v2" }),
+      .example({
+        "team-name": "bananaramallama",
+        "some-service-endpoint": "https://someservice.com/api/v2",
+      })
   )
   public variables: PrimitiveMap
 
-  @schema(
-    joiIdentifierMap(joiPrimitive())
-      .description("Alias for the variables field."),
-  )
+  @schema(joiIdentifierMap(joiPrimitive()).description("Alias for the variables field."))
   public var: PrimitiveMap
 
   constructor(
@@ -498,27 +511,33 @@ export class ModuleConfigContext extends ProviderConfigContext {
     moduleConfigs: ModuleConfig[],
     // We only supply this when resolving configuration in dependency order.
     // Otherwise we pass `${runtime.*} template strings through for later resolution.
-    runtimeContext?: RuntimeContext,
+    runtimeContext?: RuntimeContext
   ) {
     super(environmentName, garden.projectName, resolvedProviders)
 
     const _this = this
 
-    this.modules = new Map(moduleConfigs.map((config) =>
-      <[string, () => Promise<ModuleContext>]>[config.name, async (opts: ContextResolveOpts) => {
-        // NOTE: This is a temporary hacky solution until we implement module resolution as a TaskGraph task
-        const stackKey = "modules." + config.name
-        const resolvedConfig = await garden.resolveModuleConfig(config.name, {
-          configContext: _this,
-          ...opts,
-          stack: [...opts.stack || [], stackKey],
-        })
-        const version = await garden.resolveVersion(resolvedConfig.name, resolvedConfig.build.dependencies)
-        const buildPath = await garden.buildDir.buildPath(config.name)
+    this.modules = new Map(
+      moduleConfigs.map(
+        (config) =>
+          <[string, () => Promise<ModuleContext>]>[
+            config.name,
+            async (opts: ContextResolveOpts) => {
+              // NOTE: This is a temporary hacky solution until we implement module resolution as a TaskGraph task
+              const stackKey = "modules." + config.name
+              const resolvedConfig = await garden.resolveModuleConfig(config.name, {
+                configContext: _this,
+                ...opts,
+                stack: [...(opts.stack || []), stackKey],
+              })
+              const version = await garden.resolveVersion(resolvedConfig.name, resolvedConfig.build.dependencies)
+              const buildPath = await garden.buildDir.buildPath(config.name)
 
-        return new ModuleContext(_this, resolvedConfig, buildPath, version)
-      }],
-    ))
+              return new ModuleContext(_this, resolvedConfig, buildPath, version)
+            },
+          ]
+      )
+    )
 
     this.runtime = new RuntimeConfigContext(this, runtimeContext)
 

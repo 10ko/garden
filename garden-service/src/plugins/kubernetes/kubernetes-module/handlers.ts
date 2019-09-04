@@ -47,9 +47,11 @@ async function build({ module }: BuildModuleParams<KubernetesModule>): Promise<B
   return { fresh: true }
 }
 
-async function getServiceStatus(
-  { ctx, module, log }: GetServiceStatusParams<KubernetesModule>,
-): Promise<ServiceStatus> {
+async function getServiceStatus({
+  ctx,
+  module,
+  log,
+}: GetServiceStatusParams<KubernetesModule>): Promise<ServiceStatus> {
   const k8sCtx = <KubernetesPluginContext>ctx
   const namespace = await getNamespace({
     log,
@@ -72,9 +74,7 @@ async function getServiceStatus(
   }
 }
 
-async function deployService(
-  params: DeployServiceParams<KubernetesModule>,
-): Promise<ServiceStatus> {
+async function deployService(params: DeployServiceParams<KubernetesModule>): Promise<ServiceStatus> {
   const { ctx, force, module, service, log } = params
 
   const k8sCtx = <KubernetesPluginContext>ctx
@@ -87,7 +87,14 @@ async function deployService(
   const manifests = await getManifests(module)
 
   const pruneSelector = getSelector(service)
-  await apply({ log, provider: k8sCtx.provider, manifests, force, namespace, pruneSelector })
+  await apply({
+    log,
+    provider: k8sCtx.provider,
+    manifests,
+    force,
+    namespace,
+    pruneSelector,
+  })
 
   await waitForResources({
     ctx: k8sCtx,
@@ -113,7 +120,7 @@ async function deleteService(params: DeleteServiceParams): Promise<ServiceStatus
     namespace,
     labelKey: gardenAnnotationKey("service"),
     labelValue: service.name,
-    objectTypes: uniq(manifests.map(m => m.kind)),
+    objectTypes: uniq(manifests.map((m) => m.kind)),
     includeUninitialized: false,
   })
 
@@ -135,15 +142,17 @@ function getSelector(service: KubernetesService) {
 }
 
 async function getManifests(module: KubernetesModule): Promise<KubernetesResource[]> {
-  const fileManifests = flatten(await Bluebird.map(module.spec.files, async (path) => {
-    const absPath = resolve(module.buildPath, path)
-    return safeLoadAll((await readFile(absPath)).toString())
-  }))
+  const fileManifests = flatten(
+    await Bluebird.map(module.spec.files, async (path) => {
+      const absPath = resolve(module.buildPath, path)
+      return safeLoadAll((await readFile(absPath)).toString())
+    })
+  )
 
   const manifests = [...module.spec.manifests, ...fileManifests]
 
   // Add a label, so that we can identify the manifests as part of this module, and prune if needed
-  return manifests.map(manifest => {
+  return manifests.map((manifest) => {
     set(manifest, ["metadata", "annotations", gardenAnnotationKey("service")], module.name)
     set(manifest, ["metadata", "labels", gardenAnnotationKey("service")], module.name)
     return manifest

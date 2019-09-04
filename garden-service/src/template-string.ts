@@ -39,17 +39,26 @@ async function getParser() {
  * dependencies when resolving context variables.
  */
 export async function resolveTemplateString(
-  string: string, context: ConfigContext, opts: ContextResolveOpts = {},
+  string: string,
+  context: ConfigContext,
+  opts: ContextResolveOpts = {}
 ): Promise<Primitive | undefined> {
   const parser = await getParser()
   const parsed = parser.parse(string, {
     getKey: async (key: string[], resolveOpts?: ContextResolveOpts) => {
-      return context.resolve({ key, nodePath: [], opts: { ...opts, ...resolveOpts || {} } })
+      return context.resolve({
+        key,
+        nodePath: [],
+        opts: { ...opts, ...(resolveOpts || {}) },
+      })
     },
     // need this to allow nested template strings
     resolve: async (parts: StringOrStringPromise[], resolveOpts?: ContextResolveOpts) => {
       const s = (await Bluebird.all(parts)).join("")
-      return resolveTemplateString(`\$\{${s}\}`, context, { ...opts, ...resolveOpts || {} })
+      return resolveTemplateString(`\$\{${s}\}`, context, {
+        ...opts,
+        ...(resolveOpts || {}),
+      })
     },
     // Some utilities to pass to the parser
     lodash,
@@ -59,11 +68,12 @@ export async function resolveTemplateString(
 
   const resolved: (Primitive | undefined)[] = await Bluebird.all(parsed)
 
-  const result = resolved.length === 1
-    // Return value directly if there is only one value in the output
-    ? resolved[0]
-    // Else join together all the parts as a string. Output null as a literal string and not an empty string.
-    : resolved.map(v => v === null ? "null" : v).join("")
+  const result =
+    resolved.length === 1
+      ? // Return value directly if there is only one value in the output
+        resolved[0]
+      : // Else join together all the parts as a string. Output null as a literal string and not an empty string.
+        resolved.map((v) => (v === null ? "null" : v)).join("")
 
   return <Primitive | undefined>result
 }
@@ -72,13 +82,15 @@ export async function resolveTemplateString(
  * Recursively parses and resolves all templated strings in the given object.
  */
 export async function resolveTemplateStrings<T extends object>(
-  obj: T, context: ConfigContext, opts: ContextResolveOpts = {},
+  obj: T,
+  context: ConfigContext,
+  opts: ContextResolveOpts = {}
 ): Promise<T> {
   return asyncDeepMap(
     obj,
-    (v) => typeof v === "string" ? resolveTemplateString(v, context, opts) : v,
+    (v) => (typeof v === "string" ? resolveTemplateString(v, context, opts) : v),
     // need to iterate sequentially to catch potential circular dependencies
-    { concurrency: 1 },
+    { concurrency: 1 }
   )
 }
 
@@ -93,5 +105,5 @@ export async function collectTemplateReferences<T extends object>(obj: T): Promi
 
 export async function getRuntimeTemplateReferences<T extends object>(obj: T) {
   const refs = await collectTemplateReferences(obj)
-  return refs.filter(ref => ref[0] === "runtime")
+  return refs.filter((ref) => ref[0] === "runtime")
 }

@@ -10,13 +10,7 @@ import * as logSymbols from "log-symbols"
 import * as yaml from "js-yaml"
 import chalk from "chalk"
 import stripAnsi from "strip-ansi"
-import {
-  curryRight,
-  flow,
-  isArray,
-  isEmpty,
-  repeat,
-} from "lodash"
+import { curryRight, flow, isArray, isEmpty, repeat } from "lodash"
 import cliTruncate = require("cli-truncate")
 import stringWidth = require("string-width")
 import hasAnsi = require("has-ansi")
@@ -40,8 +34,8 @@ const cliPadEnd = (s: string, width: number): string => {
 }
 const truncateSection = (s: string) => cliTruncate(s, SECTION_PREFIX_WIDTH)
 const sectionStyle = (s: string) => chalk.cyan.italic(cliPadEnd(truncateSection(s), SECTION_PREFIX_WIDTH))
-export const msgStyle = (s: string) => hasAnsi(s) ? s : chalk.gray(s)
-export const errorStyle = (s: string) => hasAnsi(s) ? s : chalk.red(s)
+export const msgStyle = (s: string) => (hasAnsi(s) ? s : chalk.gray(s))
+export const errorStyle = (s: string) => (hasAnsi(s) ? s : chalk.red(s))
 
 /*** RENDER HELPERS ***/
 function insertVal(out: string[], idx: number, toRender: Function | string, renderArgs: any[]): string[] {
@@ -109,7 +103,10 @@ export function renderError(entry: LogEntry) {
     if (!isEmpty(filteredDetail)) {
       try {
         const sanitized = sanitizeObject(filteredDetail)
-        const yamlDetail = yaml.safeDump(sanitized, { noRefs: true, skipInvalid: true })
+        const yamlDetail = yaml.safeDump(sanitized, {
+          noRefs: true,
+          skipInvalid: true,
+        })
         out += `\nError Details:\n${yamlDetail}`
       } catch (err) {
         out += `\nUnable to render error details:\n${err.message}`
@@ -143,7 +140,7 @@ export function renderMsg(entry: LogEntry): string {
   if (isArray(msg)) {
     // We apply the style function to each item (as opposed to the entire string) in case some
     // part of the message already has a style
-    return msg.map(str => styleFn(str)).join(styleFn(" → "))
+    return msg.map((str) => styleFn(str)).join(styleFn(" → "))
   }
   return msg ? styleFn(msg) : ""
 }
@@ -169,7 +166,7 @@ export function renderSection(entry: LogEntry): string {
 
 export function formatForTerminal(entry: LogEntry): string {
   const { msg, emoji, section, symbol, data } = entry.getMessageState()
-  const empty = [msg, section, emoji, symbol, data].every(val => val === undefined)
+  const empty = [msg, section, emoji, symbol, data].every((val) => val === undefined)
   if (empty) {
     return ""
   }

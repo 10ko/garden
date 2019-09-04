@@ -57,28 +57,28 @@ export interface MavenContainerModule<
   S extends ContainerServiceSpec = ContainerServiceSpec,
   T extends ContainerTestSpec = ContainerTestSpec,
   W extends ContainerTaskSpec = ContainerTaskSpec
-  > extends Module<M, S, T, W> { }
+> extends Module<M, S, T, W> {}
 
 const mavenKeys = {
-  jarPath: joi.string()
+  jarPath: joi
+    .string()
     .required()
     .posixPath({ subPathOnly: true })
     .description("POSIX-style path to the packaged JAR artifact, relative to the module directory.")
     .example("target/my-module.jar"),
-  jdkVersion: joi.number()
+  jdkVersion: joi
+    .number()
     .integer()
     .allow(8, 11)
     .default(8)
     .description("The JDK version to use."),
-  mvnOpts: joiArray(joi.string())
-    .description("Options to add to the `mvn package` command when building."),
+  mvnOpts: joiArray(joi.string()).description("Options to add to the `mvn package` command when building."),
 }
 
 const mavenContainerModuleSpecSchema = containerModuleSpecSchema.keys(mavenKeys)
-export const mavenContainerConfigSchema = providerConfigBaseSchema
-  .keys({
-    name: joiProviderName("maven-container"),
-  })
+export const mavenContainerConfigSchema = providerConfigBaseSchema.keys({
+  name: joiProviderName("maven-container"),
+})
 
 export const gardenPlugin = (): GardenPlugin => {
   const basePlugin = containerPlugin()
@@ -121,7 +121,10 @@ async function describeType() {
 export async function configureMavenContainerModule(params: ConfigureModuleParams<MavenContainerModule>) {
   const { moduleConfig } = params
 
-  let containerConfig: ContainerModuleConfig = { ...moduleConfig, type: "container" }
+  let containerConfig: ContainerModuleConfig = {
+    ...moduleConfig,
+    type: "container",
+  }
   containerConfig.spec = <ContainerModuleSpec>omit(moduleConfig.spec, Object.keys(mavenKeys))
 
   const jdkVersion = moduleConfig.spec.jdkVersion!
@@ -131,7 +134,10 @@ export async function configureMavenContainerModule(params: ConfigureModuleParam
     JDK_VERSION: jdkVersion.toString(),
   }
 
-  const configured = await configureContainerModule({ ...params, moduleConfig: containerConfig })
+  const configured = await configureContainerModule({
+    ...params,
+    moduleConfig: containerConfig,
+  })
 
   return {
     ...configured,
@@ -169,13 +175,7 @@ async function build(params: BuildModuleParams<MavenContainerModule>) {
   const openJdk = openJdks[jdkVersion]
   const openJdkPath = await openJdk.getPath(log)
 
-  const mvnArgs = [
-    "package",
-    "--batch-mode",
-    "--projects", ":" + artifactId,
-    "--also-make",
-    ...mvnOpts,
-  ]
+  const mvnArgs = ["package", "--batch-mode", "--projects", ":" + artifactId, "--also-make", ...mvnOpts]
   const mvnCmdStr = "mvn " + mvnArgs.join(" ")
 
   // Maven has issues when running concurrent processes, so we're working around that with a lock.
@@ -195,10 +195,10 @@ async function build(params: BuildModuleParams<MavenContainerModule>) {
   const resolvedJarPath = resolve(module.path, jarPath)
 
   if (!(await pathExists(resolvedJarPath))) {
-    throw new RuntimeError(
-      `Could not find artifact at ${resolvedJarPath} after running '${mvnCmdStr}'`,
-      { jarPath, mvnArgs },
-    )
+    throw new RuntimeError(`Could not find artifact at ${resolvedJarPath} after running '${mvnCmdStr}'`, {
+      jarPath,
+      mvnArgs,
+    })
   }
 
   await copy(resolvedJarPath, resolve(module.buildPath, "app.jar"))

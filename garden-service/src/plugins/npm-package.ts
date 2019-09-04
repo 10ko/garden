@@ -7,9 +7,7 @@
  */
 
 import { GardenPlugin } from "../types/plugin/plugin"
-import {
-  execPlugin,
-} from "./exec"
+import { execPlugin } from "./exec"
 
 export const gardenPlugin = (): GardenPlugin => ({
   moduleActions: {

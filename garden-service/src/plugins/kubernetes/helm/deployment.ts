@@ -29,9 +29,14 @@ import { DeployServiceParams } from "../../../types/plugin/service/deployService
 import { DeleteServiceParams } from "../../../types/plugin/service/deleteService"
 import { getForwardablePorts } from "../port-forward"
 
-export async function deployService(
-  { ctx, module, service, log, force, hotReload }: DeployServiceParams<HelmModule>,
-): Promise<ServiceStatus> {
+export async function deployService({
+  ctx,
+  module,
+  service,
+  log,
+  force,
+  hotReload,
+}: DeployServiceParams<HelmModule>): Promise<ServiceStatus> {
   let hotReloadSpec: ContainerHotReloadSpec | null = null
   let hotReloadTarget: HotReloadableResource | null = null
 
@@ -39,7 +44,13 @@ export async function deployService(
 
   if (hotReload) {
     const resourceSpec = service.spec.serviceResource
-    hotReloadTarget = await findServiceResource({ ctx, log, module, chartResources, resourceSpec })
+    hotReloadTarget = await findServiceResource({
+      ctx,
+      log,
+      module,
+      chartResources,
+      resourceSpec,
+    })
     hotReloadSpec = getHotReloadSpec(service)
   }
 
@@ -54,13 +65,17 @@ export async function deployService(
   if (releaseStatus.state === "missing") {
     log.silly(`Installing Helm release ${releaseName}`)
     const installArgs = [
-      "install", chartPath,
-      "--name", releaseName,
-      "--namespace", namespace,
-      ...await getValueFileArgs(module),
+      "install",
+      chartPath,
+      "--name",
+      releaseName,
+      "--namespace",
+      namespace,
+      ...(await getValueFileArgs(module)),
       // Make sure chart gets purged if it fails to install
       "--atomic",
-      "--timeout", "600",
+      "--timeout",
+      "600",
     ]
     if (force) {
       installArgs.push("--replace")
@@ -69,10 +84,13 @@ export async function deployService(
   } else {
     log.silly(`Upgrading Helm release ${releaseName}`)
     const upgradeArgs = [
-      "upgrade", releaseName, chartPath,
+      "upgrade",
+      releaseName,
+      chartPath,
       "--install",
-      "--namespace", namespace,
-      ...await getValueFileArgs(module),
+      "--namespace",
+      namespace,
+      ...(await getValueFileArgs(module)),
     ]
     if (force) {
       upgradeArgs.push("--force")
@@ -97,7 +115,13 @@ export async function deployService(
 
   // FIXME: we should get these objects from the cluster, and not from the local `helm template` command, because
   // they may be legitimately inconsistent.
-  await waitForResources({ ctx, provider, serviceName: service.name, resources: chartResources, log })
+  await waitForResources({
+    ctx,
+    provider,
+    serviceName: service.name,
+    resources: chartResources,
+    log,
+  })
 
   const forwardablePorts = getForwardablePorts(chartResources)
 

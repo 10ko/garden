@@ -9,9 +9,7 @@ describe("GetTestResultCommand", () => {
     const name = "test-run"
     const module = "test-module"
 
-    const garden = await makeTestGarden(
-      resolve(dataDir, "test-project-dependants"),
-    )
+    const garden = await makeTestGarden(resolve(dataDir, "test-project-dependants"))
     const log = garden.log
     const command = new GetTestResultCommand()
 
@@ -25,7 +23,7 @@ describe("GetTestResultCommand", () => {
           args: { name, module },
           opts: withDefaultGlobalOpts({}),
         }),
-      "parameter",
+      "parameter"
     )
   })
 
@@ -46,6 +44,10 @@ describe("GetTestResultCommand", () => {
       opts: withDefaultGlobalOpts({}),
     })
 
-    expect(pick(res.result, ["output", "name", "module"])).to.eql({ output: null, name, module })
+    expect(pick(res.result, ["output", "name", "module"])).to.eql({
+      output: null,
+      name,
+      module,
+    })
   })
 })

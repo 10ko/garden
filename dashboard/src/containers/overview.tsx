@@ -27,7 +27,7 @@ export const overviewConfig = {
 }
 
 const Overview = styled.div`
-    padding-top: .5rem;
+  padding-top: 0.5rem;
 `
 
 const Modules = styled.div`
@@ -39,20 +39,20 @@ const Modules = styled.div`
 `
 
 export type ModuleModel = {
-  name: string;
-  type: string;
-  path?: string;
-  repositoryUrl?: string;
-  description?: string;
-  services: Service[];
-  tests: Test[];
-  tasks: Task[];
+  name: string
+  type: string
+  path?: string
+  repositoryUrl?: string
+  description?: string
+  services: Service[]
+  tests: Test[]
+  tasks: Task[]
 }
 export type Entity = {
-  name: string;
-  state?: ServiceState | RunState;
-  isLoading: boolean;
-  dependencies: string[];
+  name: string
+  state?: ServiceState | RunState
+  isLoading: boolean
+  dependencies: string[]
 }
 export interface Service extends Entity {
   state?: ServiceState
@@ -83,9 +83,7 @@ export default () => {
     state: {
       overview: { selectedIngress, selectedEntity },
     },
-    actions: {
-      selectEntity,
-    },
+    actions: { selectEntity },
   } = useContext(UiStateContext)
 
   useEffect(loadConfig, [])
@@ -101,19 +99,21 @@ export default () => {
   let modules: ModuleModel[] = []
 
   if (config.error || status.error) {
-    modulesContainerComponent = <PageError error={config.error || status.error} />
+    modulesContainerComponent = (
+      <PageError error={config.error || status.error} />
+    )
   } else if (isLoadingConfig) {
     modulesContainerComponent = <Spinner />
   } else if (config.data && config.data.moduleConfigs) {
-
     // fill modules with services names
     modules = config.data.moduleConfigs.map(moduleConfig => ({
       name: moduleConfig.name,
       type: moduleConfig.type,
-      path: config.data &&
+      path:
+        config.data &&
         config.data.projectRoot &&
         config.data.projectRoot.split("/").pop() +
-        moduleConfig.path.replace(config.data.projectRoot, ""),
+          moduleConfig.path.replace(config.data.projectRoot, ""),
       repositoryUrl: moduleConfig.repositoryUrl,
       description: moduleConfig.description,
       services: moduleConfig.serviceConfigs.map(service => ({
@@ -140,7 +140,9 @@ export default () => {
       const tasksStatus = status.data.tasks
       for (let currModule of modules) {
         for (let serviceName of Object.keys(servicesStatus)) {
-          const index = currModule.services.findIndex(s => s.name === serviceName)
+          const index = currModule.services.findIndex(
+            s => s.name === serviceName
+          )
 
           if (index !== -1) {
             currModule.services[index] = {
@@ -153,7 +155,9 @@ export default () => {
         }
 
         for (let testName of Object.keys(testsStatus)) {
-          const index = currModule.tests.findIndex(t => t.name === testName.split(".")[1])
+          const index = currModule.tests.findIndex(
+            t => t.name === testName.split(".")[1]
+          )
 
           if (index !== -1) {
             const testStatus = testsStatus[testName]
@@ -163,7 +167,8 @@ export default () => {
               isLoading: false,
               startedAt: testStatus.startedAt,
               completedAt: testStatus.completedAt,
-              duration: testStatus.startedAt &&
+              duration:
+                testStatus.startedAt &&
                 testStatus.completedAt &&
                 getDuration(testStatus.startedAt, testStatus.completedAt),
             }
@@ -181,7 +186,8 @@ export default () => {
               isLoading: false,
               startedAt: taskStatus.startedAt,
               completedAt: taskStatus.completedAt,
-              duration: taskStatus.startedAt &&
+              duration:
+                taskStatus.startedAt &&
                 taskStatus.completedAt &&
                 getDuration(taskStatus.startedAt, taskStatus.completedAt),
             }
@@ -200,13 +206,11 @@ export default () => {
               ))}
             </Modules>
           </div>
-          {selectedIngress &&
+          {selectedIngress && (
             <div className="col-lg visible-lg-block">
-              {selectedIngress &&
-                <ViewIngress ingress={selectedIngress} />
-              }
+              {selectedIngress && <ViewIngress ingress={selectedIngress} />}
             </div>
-          }
+          )}
           {selectedEntity && (
             <div className="col-xs-5 col-sm-5 col-md-4 col-lg-4 col-xl-4">
               <EntityResult
@@ -218,11 +222,9 @@ export default () => {
             </div>
           )}
         </div>
-      </Overview >
+      </Overview>
     )
   }
 
-  return (
-    <div>{modulesContainerComponent}</div>
-  )
+  return <div>{modulesContainerComponent}</div>
 }

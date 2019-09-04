@@ -29,25 +29,29 @@ import { RunTaskParams, RunTaskResult } from "../types/plugin/task/runTask"
 export const name = "exec"
 
 export interface ExecTestSpec extends BaseTestSpec {
-  command: string[],
-  env: { [key: string]: string },
+  command: string[]
+  env: { [key: string]: string }
 }
 
 export const execTestSchema = baseTestSpecSchema
   .keys({
-    command: joi.array().items(joi.string())
+    command: joi
+      .array()
+      .items(joi.string())
       .description("The command to run in the module build context in order to test it."),
     env: joiEnvVars(),
   })
   .description("The test specification of an exec module.")
 
 export interface ExecTaskSpec extends BaseTaskSpec {
-  command: string[],
+  command: string[]
 }
 
 export const execTaskSpecSchema = baseTaskSpecSchema
   .keys({
-    command: joi.array().items(joi.string())
+    command: joi
+      .array()
+      .items(joi.string())
       .description("The command to run in the module build context."),
   })
   .description("A task that can be run in this module.")
@@ -57,39 +61,37 @@ interface ExecBuildSpec extends BaseBuildSpec {
 }
 
 export interface ExecModuleSpec extends ModuleSpec {
-  build: ExecBuildSpec,
-  env: { [key: string]: string },
-  tasks: ExecTaskSpec[],
-  tests: ExecTestSpec[],
+  build: ExecBuildSpec
+  env: { [key: string]: string }
+  tasks: ExecTaskSpec[]
+  tests: ExecTestSpec[]
 }
 
 export type ExecModuleConfig = ModuleConfig<ExecModuleSpec>
 
-export const execBuildSpecSchema = baseBuildSpecSchema
-  .keys({
-    command: joiArray(joi.string())
-      .description("The command to run inside the module's directory to perform the build.")
-      .example([["npm", "run", "build"], {}]),
-  })
+export const execBuildSpecSchema = baseBuildSpecSchema.keys({
+  command: joiArray(joi.string())
+    .description("The command to run inside the module's directory to perform the build.")
+    .example([["npm", "run", "build"], {}]),
+})
 
-export const execModuleSpecSchema = joi.object()
+export const execModuleSpecSchema = joi
+  .object()
   .keys({
     build: execBuildSpecSchema,
     env: joiEnvVars(),
-    tasks: joiArray(execTaskSpecSchema)
-      .description("A list of tasks that can be run in this module."),
-    tests: joiArray(execTestSchema)
-      .description("A list of tests to run in the module."),
+    tasks: joiArray(execTaskSpecSchema).description("A list of tasks that can be run in this module."),
+    tests: joiArray(execTestSchema).description("A list of tests to run in the module."),
   })
   .unknown(false)
   .description("The module specification for an exec module.")
 
-export interface ExecModule extends Module<ExecModuleSpec, CommonServiceSpec, ExecTestSpec> { }
+export interface ExecModule extends Module<ExecModuleSpec, CommonServiceSpec, ExecTestSpec> {}
 
-export async function configureExecModule(
-  { ctx, moduleConfig }: ConfigureModuleParams<ExecModule>,
-): Promise<ConfigureModuleResult> {
-
+export async function configureExecModule({
+  ctx,
+  moduleConfig,
+}: ConfigureModuleParams<ExecModule>): Promise<ConfigureModuleResult> {
   moduleConfig.spec = validateWithPath({
     config: moduleConfig.spec,
     schema: execModuleSpecSchema,
@@ -98,14 +100,14 @@ export async function configureExecModule(
     projectRoot: ctx.projectRoot,
   })
 
-  moduleConfig.taskConfigs = moduleConfig.spec.tasks.map(t => ({
+  moduleConfig.taskConfigs = moduleConfig.spec.tasks.map((t) => ({
     name: t.name,
     dependencies: t.dependencies,
     timeout: t.timeout,
     spec: t,
   }))
 
-  moduleConfig.testConfigs = moduleConfig.spec.tests.map(t => ({
+  moduleConfig.testConfigs = moduleConfig.spec.tests.map((t) => ({
     name: t.name,
     dependencies: t.dependencies,
     spec: t,
@@ -137,14 +139,14 @@ export async function buildExecModule({ module }: BuildModuleParams<ExecModule>)
   const buildPath = module.buildPath
 
   if (module.spec.build.command.length) {
-    const res = await execa(
-      module.spec.build.command.join(" "),
-      {
-        cwd: buildPath,
-        env: { ...process.env, ...mapValues(module.spec.env, v => v.toString()) },
-        shell: true,
+    const res = await execa(module.spec.build.command.join(" "), {
+      cwd: buildPath,
+      env: {
+        ...process.env,
+        ...mapValues(module.spec.env, (v) => v.toString()),
       },
-    )
+      shell: true,
+    })
 
     output.fresh = true
     output.buildLog = res.stdout + res.stderr
@@ -161,20 +163,17 @@ export async function testExecModule({ module, testConfig }: TestModuleParams<Ex
   const startedAt = new Date()
   const command = testConfig.spec.command
 
-  const result = await execa(
-    command.join(" "),
-    {
-      cwd: module.buildPath,
-      env: {
-        ...process.env,
-        // need to cast the values to strings
-        ...mapValues(module.spec.env, v => v + ""),
-        ...mapValues(testConfig.spec.env, v => v + ""),
-      },
-      reject: false,
-      shell: true,
+  const result = await execa(command.join(" "), {
+    cwd: module.buildPath,
+    env: {
+      ...process.env,
+      // need to cast the values to strings
+      ...mapValues(module.spec.env, (v) => v + ""),
+      ...mapValues(testConfig.spec.env, (v) => v + ""),
     },
-  )
+    reject: false,
+    shell: true,
+  })
 
   return {
     moduleName: module.name,
@@ -198,14 +197,14 @@ export async function runExecTask(params: RunTaskParams): Promise<RunTaskResult>
   let log: string
 
   if (command && command.length) {
-    const commandResult = await execa(
-      command.join(" "),
-      {
-        cwd: module.buildPath,
-        env: { ...process.env, ...mapValues(module.spec.env, v => v.toString()) },
-        shell: true,
+    const commandResult = await execa(command.join(" "), {
+      cwd: module.buildPath,
+      env: {
+        ...process.env,
+        ...mapValues(module.spec.env, (v) => v.toString()),
       },
-    )
+      shell: true,
+    })
 
     completedAt = new Date()
     log = (commandResult.stdout + commandResult.stderr).trim()
@@ -237,16 +236,16 @@ async function describeType() {
     `,
     moduleOutputsSchema: joi.object().keys({}),
     schema: execModuleSpecSchema,
-    taskOutputsSchema: joi.object()
-      .keys({
-        log: joi.string()
-          .allow("")
-          .default("")
-          .description(
-            "The full log from the executed task. " +
-            "(Pro-tip: Make it machine readable so it can be parsed by dependant tasks and services!)",
-          ),
-      }),
+    taskOutputsSchema: joi.object().keys({
+      log: joi
+        .string()
+        .allow("")
+        .default("")
+        .description(
+          "The full log from the executed task. " +
+            "(Pro-tip: Make it machine readable so it can be parsed by dependant tasks and services!)"
+        ),
+    }),
   }
 }
 

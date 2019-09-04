@@ -23,5 +23,8 @@ export const ExternalLink = styled.a`
 `
 
 export const NavLink = props => (
-  <ReactRouterNavLink {...props} activeStyle={{ color: colors.gardenPink, fontWeight: 500 }} />
+  <ReactRouterNavLink
+    {...props}
+    activeStyle={{ color: colors.gardenPink, fontWeight: 500 }}
+  />
 )

@@ -7,12 +7,7 @@
  */
 
 import * as yaml from "js-yaml"
-import {
-  Command,
-  CommandParams,
-  ChoicesParameter,
-  BooleanParameter,
-} from "../base"
+import { Command, CommandParams, ChoicesParameter, BooleanParameter } from "../base"
 import { findProjectConfig } from "../../config/base"
 import { ensureDir, copy, remove, pathExists, writeFile } from "fs-extra"
 import { getPackageVersion } from "../../util/util"
@@ -49,9 +44,12 @@ export async function collectBasicDebugInfo(root: string, gardenDirPath: string,
   // Find project definition
   const config = await findProjectConfig(root, true)
   if (!config) {
-    throw new ValidationError(deline`
+    throw new ValidationError(
+      deline`
       Couldn't find a garden.yml with a project definition.
-      Please run this command from the root of your Garden project.`, {})
+      Please run this command from the root of your Garden project.`,
+      {}
+    )
   }
 
   // Create temporary folder inside .garden/ at root of project
@@ -72,32 +70,53 @@ export async function collectBasicDebugInfo(root: string, gardenDirPath: string,
   const vcs = new GitHandler(root, config.dotIgnoreFiles || defaultDotIgnoreFiles)
   const include = config.modules && config.modules.include
   const exclude = config.modules && config.modules.exclude
-  const paths = await findConfigPathsInPath({ vcs, dir: root, include, exclude, log })
+  const paths = await findConfigPathsInPath({
+    vcs,
+    dir: root,
+    include,
+    exclude,
+    log,
+  })
 
   // Copy all the service configuration files
   for (const configPath of paths) {
     const servicePath = dirname(configPath)
     const gardenPathLog = log.info({
-      section: relative(root, servicePath) || "/", msg: "collecting info", status: "active",
+      section: relative(root, servicePath) || "/",
+      msg: "collecting info",
+      status: "active",
     })
     const tempServicePath = join(tempPath, relative(root, servicePath))
     await ensureDir(tempServicePath)
     const moduleConfigFilePath = await getConfigFilePath(servicePath)
     const moduleConfigFilename = basename(moduleConfigFilePath)
     const gardenLog = gardenPathLog.info({
-      section: moduleConfigFilename, msg: "collecting garden.yml", status: "active",
+      section: moduleConfigFilename,
+      msg: "collecting garden.yml",
+      status: "active",
     })
     await copy(moduleConfigFilePath, join(tempServicePath, moduleConfigFilename))
-    gardenLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
+    gardenLog.setSuccess({
+      msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+      append: true,
+    })
     // Check if error logs exist and copy them over if they do
     if (await pathExists(join(servicePath, ERROR_LOG_FILENAME))) {
       const errorLog = gardenPathLog.info({
-        section: ERROR_LOG_FILENAME, msg: `collecting ${ERROR_LOG_FILENAME}`, status: "active",
+        section: ERROR_LOG_FILENAME,
+        msg: `collecting ${ERROR_LOG_FILENAME}`,
+        status: "active",
       })
       await copy(join(servicePath, ERROR_LOG_FILENAME), join(tempServicePath, ERROR_LOG_FILENAME))
-      errorLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
+      errorLog.setSuccess({
+        msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+        append: true,
+      })
     }
-    gardenPathLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
+    gardenPathLog.setSuccess({
+      msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+      append: true,
+    })
   }
 }
 
@@ -112,17 +131,32 @@ export async function collectBasicDebugInfo(root: string, gardenDirPath: string,
 export async function collectSystemDiagnostic(gardenDirPath: string, log: LogEntry, format: string) {
   const tempPath = join(gardenDirPath, TEMP_DEBUG_ROOT)
   await ensureDir(tempPath)
-  const dockerLog = log.info({ section: "Docker", msg: "collecting info", status: "active" })
+  const dockerLog = log.info({
+    section: "Docker",
+    msg: "collecting info",
+    status: "active",
+  })
   let dockerVersion = ""
   try {
     dockerVersion = (await execa("docker", ["--version"])).stdout
-    dockerLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
+    dockerLog.setSuccess({
+      msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+      append: true,
+    })
   } catch (error) {
     log.error("Error encountered while executing docker")
     log.error(error)
   }
-  const systemLog = log.info({ section: "Operating System", msg: "collecting info", status: "active" })
-  const gardenLog = log.info({ section: "Garden", msg: "getting version", status: "active" })
+  const systemLog = log.info({
+    section: "Operating System",
+    msg: "collecting info",
+    status: "active",
+  })
+  const gardenLog = log.info({
+    section: "Garden",
+    msg: "getting version",
+    status: "active",
+  })
 
   const systemInfo = {
     gardenVersion: getPackageVersion(),
@@ -131,8 +165,14 @@ export async function collectSystemDiagnostic(gardenDirPath: string, log: LogEnt
     dockerVersion,
   }
 
-  systemLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
-  gardenLog.setSuccess({ msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`), append: true })
+  systemLog.setSuccess({
+    msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+    append: true,
+  })
+  gardenLog.setSuccess({
+    msg: chalk.green(`Done (took ${log.getDuration(1)} sec)`),
+    append: true,
+  })
 
   const outputFileName = `${SYSTEM_INFO_FILENAME_NO_EXT}.${format}`
   await writeFile(join(tempPath, outputFileName), renderInfo(systemInfo, format), "utf8")
@@ -161,7 +201,6 @@ export async function collectProviderDebugInfo(garden: Garden, log: LogEntry, fo
     await ensureDir(prividerPath)
     const outputFileName = `${PROVIDER_INFO_FILENAME_NO_EXT}.${format}`
     await writeFile(join(prividerPath, outputFileName), renderInfo(info, format), "utf8")
-
   }
 }
 
@@ -176,24 +215,44 @@ export async function collectProviderDebugInfo(garden: Garden, log: LogEntry, fo
  * @param {LogEntry} log
  */
 export async function generateBasicDebugInfoReport(
-  root: string, gardenDirPath: string, log: LogEntry, format = "json") {
+  root: string,
+  gardenDirPath: string,
+  log: LogEntry,
+  format = "json"
+) {
   log.setWarn({
-    msg: chalk.yellow(
-      "It looks like Garden couldn't validate your project: generating basic report.",
-    ), append: true,
+    msg: chalk.yellow("It looks like Garden couldn't validate your project: generating basic report."),
+    append: true,
   })
 
   const tempPath = join(gardenDirPath, TEMP_DEBUG_ROOT)
-  const entry = log.info({ msg: "Collecting basic debug info", status: "active" })
+  const entry = log.info({
+    msg: "Collecting basic debug info",
+    status: "active",
+  })
   // Collect project info
-  const projectEntry = entry.info({ section: "Project configuration", msg: "collecting info", status: "active" })
+  const projectEntry = entry.info({
+    section: "Project configuration",
+    msg: "collecting info",
+    status: "active",
+  })
   await collectBasicDebugInfo(root, gardenDirPath, projectEntry)
-  projectEntry.setSuccess({ msg: chalk.green(`Done (took ${projectEntry.getDuration(1)} sec)`), append: true })
+  projectEntry.setSuccess({
+    msg: chalk.green(`Done (took ${projectEntry.getDuration(1)} sec)`),
+    append: true,
+  })
 
   // Run system diagnostic
-  const systemEntry = entry.info({ section: "System", msg: "collecting info", status: "active" })
+  const systemEntry = entry.info({
+    section: "System",
+    msg: "collecting info",
+    status: "active",
+  })
   await collectSystemDiagnostic(gardenDirPath, systemEntry, format)
-  systemEntry.setSuccess({ msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`), append: true })
+  systemEntry.setSuccess({
+    msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`),
+    append: true,
+  })
 
   // Zip report folder
   entry.setState("Preparing archive")
@@ -272,25 +331,47 @@ export class GetDebugInfoCommand extends Command<Args, Opts> {
     const entry = log.info({ msg: "Collecting debug info", status: "active" })
 
     // Collect project info
-    const projectEntry = entry.info({ section: "Project configuration", msg: "collecting info", status: "active" })
+    const projectEntry = entry.info({
+      section: "Project configuration",
+      msg: "collecting info",
+      status: "active",
+    })
     await collectBasicDebugInfo(garden.projectRoot, garden.gardenDirPath, projectEntry)
-    projectEntry.setSuccess({ msg: chalk.green(`Done (took ${projectEntry.getDuration(1)} sec)`), append: true })
+    projectEntry.setSuccess({
+      msg: chalk.green(`Done (took ${projectEntry.getDuration(1)} sec)`),
+      append: true,
+    })
 
     // Run system diagnostic
-    const systemEntry = entry.info({ section: "System", msg: "collecting info", status: "active" })
+    const systemEntry = entry.info({
+      section: "System",
+      msg: "collecting info",
+      status: "active",
+    })
     await collectSystemDiagnostic(garden.projectRoot, systemEntry, opts.format)
-    systemEntry.setSuccess({ msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`), append: true })
+    systemEntry.setSuccess({
+      msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`),
+      append: true,
+    })
 
     // Collect providers info
-    const providerEntry = entry.info({ section: "Providers", msg: "collecting info", status: "active" })
+    const providerEntry = entry.info({
+      section: "Providers",
+      msg: "collecting info",
+      status: "active",
+    })
     try {
       await collectProviderDebugInfo(garden, providerEntry, opts.format, opts["include-project"])
-      providerEntry.setSuccess({ msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`), append: true })
+      providerEntry.setSuccess({
+        msg: chalk.green(`Done (took ${systemEntry.getDuration(1)} sec)`),
+        append: true,
+      })
     } catch (err) {
       // One or multiple providers threw an error while processing.
       // Skip the step but still create a report.
       providerEntry.setWarn({
-        msg: chalk.yellow(`Failed to collect providers info. Skipping this step.`), append: true,
+        msg: chalk.yellow(`Failed to collect providers info. Skipping this step.`),
+        append: true,
       })
     }
 
@@ -317,7 +398,8 @@ export class GetDebugInfoCommand extends Command<Args, Opts> {
         If you plan to make the file available to the general public (e.g. GitHub), please review the content first.
         If you need to share a file containing sensitive information with the Garden team, please contact us on
         the #garden-dev channel on https://slack.k8s.io.
-      `), append: true,
+      `),
+      append: true,
     })
 
     return { result: 0 }

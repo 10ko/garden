@@ -7,13 +7,7 @@
  */
 
 import chalk from "chalk"
-import {
-  BooleanParameter,
-  Command,
-  CommandParams,
-  StringParameter,
-  CommandResult,
-} from "../base"
+import { BooleanParameter, Command, CommandParams, StringParameter, CommandResult } from "../base"
 import dedent = require("dedent")
 import { TaskTask } from "../../tasks/task"
 import { TaskResult } from "../../task-graph"
@@ -27,7 +21,9 @@ const runArgs = {
 }
 
 const runOpts = {
-  "force-build": new BooleanParameter({ help: "Force rebuild of module before running." }),
+  "force-build": new BooleanParameter({
+    help: "Force rebuild of module before running.",
+  }),
 }
 
 type Args = typeof runArgs
@@ -49,9 +45,14 @@ export class RunTaskCommand extends Command<Args, Opts> {
   arguments = runArgs
   options = runOpts
 
-  async action(
-    { garden, log, headerLog, footerLog, args, opts }: CommandParams<Args, Opts>,
-  ): Promise<CommandResult<TaskResult>> {
+  async action({
+    garden,
+    log,
+    headerLog,
+    footerLog,
+    args,
+    opts,
+  }: CommandParams<Args, Opts>): Promise<CommandResult<TaskResult>> {
     const graph = await garden.getConfigGraph()
     const task = await graph.getTask(args.task)
 
@@ -59,7 +60,14 @@ export class RunTaskCommand extends Command<Args, Opts> {
 
     printHeader(headerLog, msg, "runner")
 
-    const taskTask = await TaskTask.factory({ garden, graph, task, log, force: true, forceBuild: opts["force-build"] })
+    const taskTask = await TaskTask.factory({
+      garden,
+      graph,
+      task,
+      log,
+      force: true,
+      forceBuild: opts["force-build"],
+    })
     const result = (await garden.processTasks([taskTask]))[taskTask.getKey()]
 
     if (!result.error) {

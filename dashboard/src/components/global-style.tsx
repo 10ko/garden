@@ -47,7 +47,8 @@ const styles = css`
   }
 
   code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+      monospace;
   }
 
   section {
@@ -67,7 +68,9 @@ const styles = css`
     box-sizing: inherit;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     margin-top: 0;
   }
 
@@ -113,6 +116,4 @@ const styles = css`
   }
 `
 
-export default () => (
-  <Global styles={styles} />
-)
+export default () => <Global styles={styles} />

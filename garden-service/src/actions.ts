@@ -99,20 +99,24 @@ export interface DeployServicesParams {
 }
 
 // avoid having to specify common params on each action helper call
-type ActionHelperParams<T extends PluginActionParamsBase> =
-  Omit<T, keyof PluginActionContextParams> & { pluginName?: string }
+type ActionHelperParams<T extends PluginActionParamsBase> = Omit<T, keyof PluginActionContextParams> & {
+  pluginName?: string
+}
 
-type ModuleActionHelperParams<T extends PluginModuleActionParamsBase> =
-  Omit<T, keyof PluginActionContextParams> & { pluginName?: string }
+type ModuleActionHelperParams<T extends PluginModuleActionParamsBase> = Omit<T, keyof PluginActionContextParams> & {
+  pluginName?: string
+}
 // additionally make runtimeContext param optional
 
-type ServiceActionHelperParams<T extends PluginServiceActionParamsBase> =
-  Omit<T, "module" | keyof PluginActionContextParams>
-  & { pluginName?: string }
+type ServiceActionHelperParams<T extends PluginServiceActionParamsBase> = Omit<
+  T,
+  "module" | keyof PluginActionContextParams
+> & { pluginName?: string }
 
-type TaskActionHelperParams<T extends PluginTaskActionParamsBase> =
-  Omit<T, "module" | keyof PluginActionContextParams>
-  & { pluginName?: string }
+type TaskActionHelperParams<T extends PluginTaskActionParamsBase> = Omit<
+  T,
+  "module" | keyof PluginActionContextParams
+> & { pluginName?: string }
 
 type RequirePluginName<T> = T & { pluginName: string }
 
@@ -121,8 +125,8 @@ export class ActionHelper implements TypeGuard {
   private readonly moduleActionHandlers: ModuleActionMap
 
   constructor(private garden: Garden, plugins: { [key: string]: GardenPlugin }) {
-    this.actionHandlers = <PluginActionMap>fromPairs(pluginActionNames.map(n => [n, {}]))
-    this.moduleActionHandlers = <ModuleActionMap>fromPairs(moduleActionNames.map(n => [n, {}]))
+    this.actionHandlers = <PluginActionMap>fromPairs(pluginActionNames.map((n) => [n, {}]))
+    this.moduleActionHandlers = <ModuleActionMap>fromPairs(moduleActionNames.map((n) => [n, {}]))
 
     for (const [name, plugin] of Object.entries(plugins)) {
       const actions = plugin.actions || {}
@@ -148,7 +152,7 @@ export class ActionHelper implements TypeGuard {
   //===========================================================================
 
   async getEnvironmentStatus(
-    params: RequirePluginName<ActionHelperParams<GetEnvironmentStatusParams>>,
+    params: RequirePluginName<ActionHelperParams<GetEnvironmentStatusParams>>
   ): Promise<EnvironmentStatus> {
     const { pluginName } = params
 
@@ -161,7 +165,7 @@ export class ActionHelper implements TypeGuard {
   }
 
   async prepareEnvironment(
-    params: RequirePluginName<ActionHelperParams<PrepareEnvironmentParams>>,
+    params: RequirePluginName<ActionHelperParams<PrepareEnvironmentParams>>
   ): Promise<PrepareEnvironmentResult> {
     const { pluginName } = params
 
@@ -173,9 +177,7 @@ export class ActionHelper implements TypeGuard {
     })
   }
 
-  async cleanupEnvironment(
-    params: RequirePluginName<ActionHelperParams<CleanupEnvironmentParams>>,
-  ) {
+  async cleanupEnvironment(params: RequirePluginName<ActionHelperParams<CleanupEnvironmentParams>>) {
     const { pluginName } = params
     return this.callActionHandler({
       actionType: "cleanupEnvironment",
@@ -187,17 +189,29 @@ export class ActionHelper implements TypeGuard {
 
   async getSecret(params: RequirePluginName<ActionHelperParams<GetSecretParams>>): Promise<GetSecretResult> {
     const { pluginName } = params
-    return this.callActionHandler({ actionType: "getSecret", pluginName, params: omit(params, ["pluginName"]) })
+    return this.callActionHandler({
+      actionType: "getSecret",
+      pluginName,
+      params: omit(params, ["pluginName"]),
+    })
   }
 
   async setSecret(params: RequirePluginName<ActionHelperParams<SetSecretParams>>): Promise<SetSecretResult> {
     const { pluginName } = params
-    return this.callActionHandler({ actionType: "setSecret", pluginName, params: omit(params, ["pluginName"]) })
+    return this.callActionHandler({
+      actionType: "setSecret",
+      pluginName,
+      params: omit(params, ["pluginName"]),
+    })
   }
 
   async deleteSecret(params: RequirePluginName<ActionHelperParams<DeleteSecretParams>>): Promise<DeleteSecretResult> {
     const { pluginName } = params
-    return this.callActionHandler({ actionType: "deleteSecret", pluginName, params: omit(params, ["pluginName"]) })
+    return this.callActionHandler({
+      actionType: "deleteSecret",
+      pluginName,
+      params: omit(params, ["pluginName"]),
+    })
   }
 
   //endregion
@@ -210,7 +224,7 @@ export class ActionHelper implements TypeGuard {
     const handler = await this.getModuleActionHandler({
       actionType: "describeType",
       moduleType,
-      defaultHandler: async ({ }) => ({
+      defaultHandler: async ({}) => ({
         docs: "",
         moduleOutputsSchema: joi.object().options({ allowUnknown: true }),
         schema: joi.object().options({ allowUnknown: true }),
@@ -221,7 +235,7 @@ export class ActionHelper implements TypeGuard {
   }
 
   async getBuildStatus<T extends Module>(
-    params: ModuleActionHelperParams<GetBuildStatusParams<T>>,
+    params: ModuleActionHelperParams<GetBuildStatusParams<T>>
   ): Promise<BuildStatus> {
     return this.callModuleHandler({
       params,
@@ -235,9 +249,13 @@ export class ActionHelper implements TypeGuard {
   }
 
   async publishModule<T extends Module>(
-    params: ModuleActionHelperParams<PublishModuleParams<T>>,
+    params: ModuleActionHelperParams<PublishModuleParams<T>>
   ): Promise<PublishResult> {
-    return this.callModuleHandler({ params, actionType: "publish", defaultHandler: dummyPublishHandler })
+    return this.callModuleHandler({
+      params,
+      actionType: "publish",
+      defaultHandler: dummyPublishHandler,
+    })
   }
 
   async runModule<T extends Module>(params: ModuleActionHelperParams<RunModuleParams<T>>): Promise<RunResult> {
@@ -249,7 +267,7 @@ export class ActionHelper implements TypeGuard {
   }
 
   async getTestResult<T extends Module>(
-    params: ModuleActionHelperParams<GetTestResultParams<T>>,
+    params: ModuleActionHelperParams<GetTestResultParams<T>>
   ): Promise<TestResult | null> {
     return this.callModuleHandler({
       params,
@@ -272,9 +290,8 @@ export class ActionHelper implements TypeGuard {
     return this.callServiceHandler({ params, actionType: "deployService" })
   }
 
-  async hotReloadService(params: ServiceActionHelperParams<HotReloadServiceParams>)
-    : Promise<HotReloadServiceResult> {
-    return this.callServiceHandler(({ params, actionType: "hotReloadService" }))
+  async hotReloadService(params: ServiceActionHelperParams<HotReloadServiceParams>): Promise<HotReloadServiceResult> {
+    return this.callServiceHandler({ params, actionType: "hotReloadService" })
   }
 
   async deleteService(params: ServiceActionHelperParams<DeleteServiceParams>): Promise<ServiceStatus> {
@@ -285,7 +302,11 @@ export class ActionHelper implements TypeGuard {
     })
 
     const runtimeContext = emptyRuntimeContext
-    const status = await this.getServiceStatus({ ...params, runtimeContext, hotReload: false })
+    const status = await this.getServiceStatus({
+      ...params,
+      runtimeContext,
+      hotReload: false,
+    })
 
     if (status.state === "missing") {
       log.setSuccess({
@@ -311,7 +332,11 @@ export class ActionHelper implements TypeGuard {
   }
 
   async getServiceLogs(params: ServiceActionHelperParams<GetServiceLogsParams>): Promise<GetServiceLogsResult> {
-    return this.callServiceHandler({ params, actionType: "getServiceLogs", defaultHandler: dummyLogStreamer })
+    return this.callServiceHandler({
+      params,
+      actionType: "getServiceLogs",
+      defaultHandler: dummyLogStreamer,
+    })
   }
 
   async runService(params: ServiceActionHelperParams<RunServiceParams>): Promise<RunResult> {
@@ -350,7 +375,7 @@ export class ActionHelper implements TypeGuard {
   //region Helper Methods
   //===========================================================================
 
-  async getStatus({ log, serviceNames }: { log: LogEntry, serviceNames?: string[] }): Promise<AllEnvironmentStatus> {
+  async getStatus({ log, serviceNames }: { log: LogEntry; serviceNames?: string[] }): Promise<AllEnvironmentStatus> {
     log.debug(`Getting environment status (${this.garden.projectName})`)
 
     const envStatus = await this.garden.getEnvironmentStatus()
@@ -362,27 +387,37 @@ export class ActionHelper implements TypeGuard {
     }
   }
 
-  async getServiceStatuses(
-    { log, serviceNames }: { log: LogEntry, serviceNames?: string[] },
-  ): Promise<ServiceStatusMap> {
+  async getServiceStatuses({
+    log,
+    serviceNames,
+  }: {
+    log: LogEntry
+    serviceNames?: string[]
+  }): Promise<ServiceStatusMap> {
     const graph = await this.garden.getConfigGraph()
     const services = await graph.getServices(serviceNames)
 
-    const tasks = services.map(service => new GetServiceStatusTask({
-      force: false,
-      garden: this.garden,
-      graph,
-      log,
-      service,
-    }))
+    const tasks = services.map(
+      (service) =>
+        new GetServiceStatusTask({
+          force: false,
+          garden: this.garden,
+          graph,
+          log,
+          service,
+        })
+    )
     const results = await this.garden.processTasks(tasks)
 
     return getServiceStatuses(results)
   }
 
-  async deployServices(
-    { serviceNames, force = false, forceBuild = false, log }: DeployServicesParams,
-  ): Promise<ProcessResults> {
+  async deployServices({
+    serviceNames,
+    force = false,
+    forceBuild = false,
+    log,
+  }: DeployServicesParams): Promise<ProcessResults> {
     const graph = await this.garden.getConfigGraph()
     const services = await graph.getServices(serviceNames)
 
@@ -392,15 +427,16 @@ export class ActionHelper implements TypeGuard {
       graph,
       log,
       watch: false,
-      handler: async (_, module) => getDependantTasksForModule({
-        garden: this.garden,
-        log,
-        graph,
-        module,
-        hotReloadServiceNames: [],
-        force,
-        forceBuild,
-      }),
+      handler: async (_, module) =>
+        getDependantTasksForModule({
+          garden: this.garden,
+          log,
+          graph,
+          module,
+          hotReloadServiceNames: [],
+          force,
+          forceBuild,
+        }),
     })
   }
 
@@ -410,26 +446,38 @@ export class ActionHelper implements TypeGuard {
   async deleteEnvironment(log: LogEntry) {
     const graph = await this.garden.getConfigGraph()
 
-    const servicesLog = log.info({ msg: chalk.white("Deleting services..."), status: "active" })
+    const servicesLog = log.info({
+      msg: chalk.white("Deleting services..."),
+      status: "active",
+    })
 
     const services = await graph.getServices()
     const serviceStatuses: { [key: string]: ServiceStatus } = {}
 
     await Bluebird.map(services, async (service) => {
-      serviceStatuses[service.name] = await this.deleteService({ log: servicesLog, service })
+      serviceStatuses[service.name] = await this.deleteService({
+        log: servicesLog,
+        service,
+      })
     })
 
     servicesLog.setSuccess()
 
     log.info("")
 
-    const envLog = log.info({ msg: chalk.white("Cleaning up environments..."), status: "active" })
+    const envLog = log.info({
+      msg: chalk.white("Cleaning up environments..."),
+      status: "active",
+    })
     const environmentStatuses: EnvironmentStatusMap = {}
 
     const providers = await this.garden.resolveProviders()
     await Bluebird.each(providers, async (provider) => {
       await this.cleanupEnvironment({ pluginName: provider.name, log: envLog })
-      environmentStatuses[provider.name] = await this.getEnvironmentStatus({ pluginName: provider.name, log: envLog })
+      environmentStatuses[provider.name] = await this.getEnvironmentStatus({
+        pluginName: provider.name,
+        log: envLog,
+      })
     })
 
     envLog.setSuccess()
@@ -437,9 +485,9 @@ export class ActionHelper implements TypeGuard {
     return { serviceStatuses, environmentStatuses }
   }
 
-  async getDebugInfo({ log, includeProject }: { log: LogEntry, includeProject: boolean }): Promise<DebugInfoMap> {
+  async getDebugInfo({ log, includeProject }: { log: LogEntry; includeProject: boolean }): Promise<DebugInfoMap> {
     const handlers = await this.getActionHandlers("getDebugInfo")
-    return Bluebird.props(mapValues(handlers, async (h) => h({ ...await this.commonParams(h, log), includeProject })))
+    return Bluebird.props(mapValues(handlers, async (h) => h({ ...(await this.commonParams(h, log)), includeProject })))
   }
 
   //endregion
@@ -454,15 +502,17 @@ export class ActionHelper implements TypeGuard {
     }
   }
 
-  private async callActionHandler<T extends keyof Omit<PluginActions, "configureProvider">>(
-    { params, actionType, pluginName, defaultHandler }:
-      {
-        params: ActionHelperParams<PluginActionParams[T]>,
-        actionType: T,
-        pluginName: string,
-        defaultHandler?: PluginActions[T],
-      },
-  ): Promise<PluginActionOutputs[T]> {
+  private async callActionHandler<T extends keyof Omit<PluginActions, "configureProvider">>({
+    params,
+    actionType,
+    pluginName,
+    defaultHandler,
+  }: {
+    params: ActionHelperParams<PluginActionParams[T]>
+    actionType: T
+    pluginName: string
+    defaultHandler?: PluginActions[T]
+  }): Promise<PluginActionOutputs[T]> {
     this.garden.log.silly(`Calling '${actionType}' handler on '${pluginName}'`)
     const handler = await this.getActionHandler({
       actionType,
@@ -470,18 +520,23 @@ export class ActionHelper implements TypeGuard {
       defaultHandler,
     })
     const handlerParams: PluginActionParams[T] = {
-      ...await this.commonParams(handler, (<any>params).log),
-      ...<any>params,
+      ...(await this.commonParams(handler, (<any>params).log)),
+      ...(<any>params),
     }
     const result = (<Function>handler)(handlerParams)
     this.garden.log.silly(`Called '${actionType}' handler on ${pluginName}'`)
     return result
   }
 
-  private async callModuleHandler<T extends keyof Omit<ModuleActions, "describeType" | "configure">>(
-    { params, actionType, defaultHandler }:
-      { params: ModuleActionHelperParams<ModuleActionParams[T]>, actionType: T, defaultHandler?: ModuleActions[T] },
-  ): Promise<ModuleActionOutputs[T]> {
+  private async callModuleHandler<T extends keyof Omit<ModuleActions, "describeType" | "configure">>({
+    params,
+    actionType,
+    defaultHandler,
+  }: {
+    params: ModuleActionHelperParams<ModuleActionParams[T]>
+    actionType: T
+    defaultHandler?: ModuleActions[T]
+  }): Promise<ModuleActionOutputs[T]> {
     const { module, pluginName, log } = params
 
     log.silly(`Getting ${actionType} handler for module ${module.name}`)
@@ -494,8 +549,8 @@ export class ActionHelper implements TypeGuard {
     })
 
     const handlerParams = {
-      ...await this.commonParams(handler, (<any>params).log),
-      ...<object>params,
+      ...(await this.commonParams(handler, (<any>params).log)),
+      ...(<object>params),
       module: omit(module, ["_ConfigType"]),
     }
 
@@ -505,10 +560,15 @@ export class ActionHelper implements TypeGuard {
     return (<Function>handler)(handlerParams)
   }
 
-  private async callServiceHandler<T extends keyof ServiceActions>(
-    { params, actionType, defaultHandler }:
-      { params: ServiceActionHelperParams<ServiceActionParams[T]>, actionType: T, defaultHandler?: ServiceActions[T] },
-  ): Promise<ServiceActionOutputs[T]> {
+  private async callServiceHandler<T extends keyof ServiceActions>({
+    params,
+    actionType,
+    defaultHandler,
+  }: {
+    params: ServiceActionHelperParams<ServiceActionParams[T]>
+    actionType: T
+    defaultHandler?: ServiceActions[T]
+  }): Promise<ServiceActionOutputs[T]> {
     let { log, service, runtimeContext } = params
     let module = omit(service.module, ["_ConfigType"])
 
@@ -532,16 +592,16 @@ export class ActionHelper implements TypeGuard {
       // Make sure everything has been resolved in the task config
       const remainingRefs = await getRuntimeTemplateReferences(service.config)
       if (remainingRefs.length > 0) {
-        const unresolvedStrings = remainingRefs.map(ref => `\${${ref.join(".")}}`).join(", ")
+        const unresolvedStrings = remainingRefs.map((ref) => `\${${ref.join(".")}}`).join(", ")
         throw new ConfigurationError(
           `Unable to resolve one or more runtime template values for service '${service.name}': ${unresolvedStrings}`,
-          { service, unresolvedStrings },
+          { service, unresolvedStrings }
         )
       }
     }
 
     const handlerParams = {
-      ...await this.commonParams(handler, log),
+      ...(await this.commonParams(handler, log)),
       ...params,
       module,
       runtimeContext,
@@ -552,13 +612,15 @@ export class ActionHelper implements TypeGuard {
     return (<Function>handler)(handlerParams)
   }
 
-  private async callTaskHandler<T extends keyof TaskActions>(
-    { params, actionType, defaultHandler }:
-      {
-        params: TaskActionHelperParams<TaskActionParams[T]>, actionType: T,
-        defaultHandler?: TaskActions[T],
-      },
-  ): Promise<TaskActionOutputs[T]> {
+  private async callTaskHandler<T extends keyof TaskActions>({
+    params,
+    actionType,
+    defaultHandler,
+  }: {
+    params: TaskActionHelperParams<TaskActionParams[T]>
+    actionType: T
+    defaultHandler?: TaskActions[T]
+  }): Promise<TaskActionOutputs[T]> {
     let { task, log } = params
     const runtimeContext = params["runtimeContext"] as (RuntimeContext | undefined)
     let module = omit(task.module, ["_ConfigType"])
@@ -583,16 +645,16 @@ export class ActionHelper implements TypeGuard {
       // Make sure everything has been resolved in the task config
       const remainingRefs = await getRuntimeTemplateReferences(task.config)
       if (remainingRefs.length > 0) {
-        const unresolvedStrings = remainingRefs.map(ref => `\${${ref.join(".")}}`).join(", ")
+        const unresolvedStrings = remainingRefs.map((ref) => `\${${ref.join(".")}}`).join(", ")
         throw new ConfigurationError(
           `Unable to resolve one or more runtime template values for task '${task.name}': ${unresolvedStrings}`,
-          { task, unresolvedStrings },
+          { task, unresolvedStrings }
         )
       }
     }
 
     const handlerParams: any = {
-      ...await this.commonParams(handler, (<any>params).log),
+      ...(await this.commonParams(handler, (<any>params).log)),
       ...params,
       module,
       task,
@@ -604,7 +666,10 @@ export class ActionHelper implements TypeGuard {
   }
 
   private addActionHandler<T extends keyof PluginActions>(
-    pluginName: string, plugin: GardenPlugin, actionType: T, handler: PluginActions[T],
+    pluginName: string,
+    plugin: GardenPlugin,
+    actionType: T,
+    handler: PluginActions[T]
   ) {
     const schema = pluginActionDescriptions[actionType].resultSchema
 
@@ -617,7 +682,9 @@ export class ActionHelper implements TypeGuard {
           pluginName,
         })
       }
-      return validate(result, schema, { context: `${actionType} output from plugin ${pluginName}` })
+      return validate(result, schema, {
+        context: `${actionType} output from plugin ${pluginName}`,
+      })
     }
     wrapped["actionType"] = actionType
     wrapped["pluginName"] = pluginName
@@ -628,7 +695,11 @@ export class ActionHelper implements TypeGuard {
   }
 
   private addModuleActionHandler<T extends keyof ModuleActions>(
-    pluginName: string, plugin: GardenPlugin, actionType: T, moduleType: string, handler: ModuleActions[T],
+    pluginName: string,
+    plugin: GardenPlugin,
+    actionType: T,
+    moduleType: string,
+    handler: ModuleActions[T]
   ) {
     const schema = moduleActionDescriptions[actionType].resultSchema
 
@@ -641,7 +712,9 @@ export class ActionHelper implements TypeGuard {
           pluginName,
         })
       }
-      return validate(result, schema, { context: `${actionType} output from plugin ${pluginName}` })
+      return validate(result, schema, {
+        context: `${actionType} output from plugin ${pluginName}`,
+      })
     }
     wrapped["actionType"] = actionType
     wrapped["pluginName"] = pluginName
@@ -653,7 +726,8 @@ export class ActionHelper implements TypeGuard {
 
     if (!this.moduleActionHandlers[actionType][moduleType]) {
       // I'm not sure why we need the cast here - JE
-      (<any>this.moduleActionHandlers[actionType])[moduleType] = {}
+      const typeHandlers: any = this.moduleActionHandlers[actionType]
+      typeHandlers[moduleType] = {}
     }
 
     this.moduleActionHandlers[actionType][moduleType][pluginName] = wrapped
@@ -663,7 +737,8 @@ export class ActionHelper implements TypeGuard {
    * Get a handler for the specified action.
    */
   public async getActionHandlers<T extends keyof PluginActions>(
-    actionType: T, pluginName?: string,
+    actionType: T,
+    pluginName?: string
   ): Promise<ActionHandlerMap<T>> {
     return this.filterActionHandlers(this.actionHandlers[actionType], pluginName)
   }
@@ -671,10 +746,15 @@ export class ActionHelper implements TypeGuard {
   /**
    * Get a handler for the specified module action.
    */
-  public async getModuleActionHandlers<T extends keyof ModuleAndRuntimeActions>(
-    { actionType, moduleType, pluginName }:
-      { actionType: T, moduleType: string, pluginName?: string },
-  ): Promise<ModuleActionHandlerMap<T>> {
+  public async getModuleActionHandlers<T extends keyof ModuleAndRuntimeActions>({
+    actionType,
+    moduleType,
+    pluginName,
+  }: {
+    actionType: T
+    moduleType: string
+    pluginName?: string
+  }): Promise<ModuleActionHandlerMap<T>> {
     return this.filterActionHandlers((this.moduleActionHandlers[actionType] || {})[moduleType], pluginName)
   }
 
@@ -694,11 +774,15 @@ export class ActionHelper implements TypeGuard {
   /**
    * Get the last configured handler for the specified action (and optionally module type).
    */
-  public async getActionHandler<T extends keyof PluginActions>(
-    { actionType, pluginName, defaultHandler }:
-      { actionType: T, pluginName: string, defaultHandler?: PluginActions[T] },
-  ): Promise<PluginActions[T]> {
-
+  public async getActionHandler<T extends keyof PluginActions>({
+    actionType,
+    pluginName,
+    defaultHandler,
+  }: {
+    actionType: T
+    pluginName: string
+    defaultHandler?: PluginActions[T]
+  }): Promise<PluginActions[T]> {
     const handlers = Object.values(await this.getActionHandlers(actionType, pluginName))
 
     if (handlers.length) {
@@ -721,8 +805,8 @@ export class ActionHelper implements TypeGuard {
     } else {
       throw new ParameterError(
         `No '${actionType}' handler configured in environment '${this.garden.environmentName}'. ` +
-        `Are you missing a provider configuration?`,
-        errorDetails,
+          `Are you missing a provider configuration?`,
+        errorDetails
       )
     }
   }
@@ -730,11 +814,17 @@ export class ActionHelper implements TypeGuard {
   /**
    * Get the last configured handler for the specified action.
    */
-  public async getModuleActionHandler<T extends keyof ModuleAndRuntimeActions>(
-    { actionType, moduleType, pluginName, defaultHandler }:
-      { actionType: T, moduleType: string, pluginName?: string, defaultHandler?: ModuleAndRuntimeActions[T] },
-  ): Promise<ModuleAndRuntimeActions[T]> {
-
+  public async getModuleActionHandler<T extends keyof ModuleAndRuntimeActions>({
+    actionType,
+    moduleType,
+    pluginName,
+    defaultHandler,
+  }: {
+    actionType: T
+    moduleType: string
+    pluginName?: string
+    defaultHandler?: ModuleAndRuntimeActions[T]
+  }): Promise<ModuleAndRuntimeActions[T]> {
     const handlers = Object.values(await this.getModuleActionHandlers({ actionType, moduleType, pluginName }))
 
     if (handlers.length) {
@@ -754,13 +844,13 @@ export class ActionHelper implements TypeGuard {
     if (pluginName) {
       throw new PluginError(
         `Plugin '${pluginName}' does not have a '${actionType}' handler for module type '${moduleType}'.`,
-        errorDetails,
+        errorDetails
       )
     } else {
       throw new ParameterError(
         `No '${actionType}' handler configured for module type '${moduleType}' in environment ` +
-        `'${this.garden.environmentName}'. Are you missing a provider configuration?`,
-        errorDetails,
+          `'${this.garden.environmentName}'. Are you missing a provider configuration?`,
+        errorDetails
       )
     }
   }

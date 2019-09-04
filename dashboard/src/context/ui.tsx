@@ -13,31 +13,38 @@ import { RenderedNodeType } from "garden-service/build/src/config-graph"
 interface UiState {
   isSidebarOpen: boolean
   overview: {
-    selectedIngress: ServiceIngress | null,
-    selectedEntity: SelectedEntity | null,
+    selectedIngress: ServiceIngress | null
+    selectedEntity: SelectedEntity | null
     filters: {
       [key in OverviewSupportedFilterKeys]: boolean
-    },
-  },
+    }
+  }
   stackGraph: {
     filters: {
       [key in StackGraphSupportedFilterKeys]: boolean
-    },
-  },
-  selectedGraphNode: string | null,
+    }
+  }
+  selectedGraphNode: string | null
 }
 
 export type SelectGraphNode = (node: string) => void
 export type SelectEntity = (selectedEntity: SelectedEntity | null) => void
 export type SelectIngress = (ingress: ServiceIngress | null) => void
-export type OverviewSupportedFilterKeys = "modules" | "modulesInfo" | "services" | "servicesInfo" |
-  "tasks" | "tasksInfo" | "tests" | "testsInfo"
+export type OverviewSupportedFilterKeys =
+  | "modules"
+  | "modulesInfo"
+  | "services"
+  | "servicesInfo"
+  | "tasks"
+  | "tasksInfo"
+  | "tests"
+  | "testsInfo"
 export type StackGraphSupportedFilterKeys = Exclude<RenderedNodeType, "publish">
 export type EntityResultSupportedTypes = StackGraphSupportedFilterKeys | "task"
 export type SelectedEntity = {
-  type: EntityResultSupportedTypes,
-  name: string,
-  module: string,
+  type: EntityResultSupportedTypes
+  name: string
+  module: string
 }
 
 interface UiActions {
@@ -65,7 +72,8 @@ const INITIAL_UI_STATE: UiState = {
       testsInfo: true,
     },
   },
-  stackGraph: { // todo: currently not attached to graph/index.tsx, use context there
+  stackGraph: {
+    // todo: currently not attached to graph/index.tsx, use context there
     filters: {
       build: true,
       run: true,
@@ -78,11 +86,13 @@ const INITIAL_UI_STATE: UiState = {
 }
 
 interface UiStateAndActions {
-  state: UiState,
-  actions: UiActions,
+  state: UiState
+  actions: UiActions
 }
 
-export const UiStateContext = React.createContext<UiStateAndActions>({} as UiStateAndActions)
+export const UiStateContext = React.createContext<UiStateAndActions>(
+  {} as UiStateAndActions
+)
 
 const useUiState = () => {
   const [uiState, setState] = useState<UiState>(INITIAL_UI_STATE)
@@ -107,7 +117,9 @@ const useUiState = () => {
     })
   }
 
-  const stackGraphToggleItemsView = (filterKey: StackGraphSupportedFilterKeys) => {
+  const stackGraphToggleItemsView = (
+    filterKey: StackGraphSupportedFilterKeys
+  ) => {
     setState({
       ...uiState,
       stackGraph: {

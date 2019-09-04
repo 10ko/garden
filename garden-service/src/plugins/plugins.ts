@@ -22,23 +22,23 @@ const mavenContainer = require("./maven-container/maven-container")
 const terraform = require("./terraform/terraform")
 
 // These plugins are always registered
-export const builtinPlugins = mapValues({
-  exec,
-  container,
-  "google-cloud-functions": gcf,
-  "local-google-cloud-functions": localGcf,
-  kubernetes,
-  "local-kubernetes": localKubernetes,
-  "npm-package": npmPackage,
-  "google-app-engine": gae,
-  "local-openfaas": localOpenfaas,
-  openfaas,
-  "maven-container": mavenContainer,
-  terraform,
-}, (m => m.gardenPlugin))
+export const builtinPlugins = mapValues(
+  {
+    exec,
+    container,
+    "google-cloud-functions": gcf,
+    "local-google-cloud-functions": localGcf,
+    kubernetes,
+    "local-kubernetes": localKubernetes,
+    "npm-package": npmPackage,
+    "google-app-engine": gae,
+    "local-openfaas": localOpenfaas,
+    openfaas,
+    "maven-container": mavenContainer,
+    terraform,
+  },
+  (m) => m.gardenPlugin
+)
 
 // These plugins are always loaded
-export const fixedPlugins = [
-  "exec",
-  "container",
-]
+export const fixedPlugins = ["exec", "container"]

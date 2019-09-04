@@ -22,7 +22,7 @@ export class EventBus extends EventEmitter2 {
     super({
       wildcard: false,
       newListener: false,
-      maxListeners: 100,    // we may need to adjust this
+      maxListeners: 100, // we may need to adjust this
     })
   }
 
@@ -51,53 +51,52 @@ export class EventBus extends EventEmitter2 {
  */
 export interface Events {
   // Internal test/control events
-  _restart: string,
-  _test: string,
+  _restart: string
+  _test: string
 
   // Watcher events
   configAdded: {
-    path: string,
-  },
+    path: string
+  }
   configRemoved: {
-    path: string,
-  },
-  projectConfigChanged: {},
+    path: string
+  }
+  projectConfigChanged: {}
   moduleConfigChanged: {
-    names: string[],
-    path: string,
-  },
+    names: string[]
+    path: string
+  }
   moduleSourcesChanged: {
-    names: string[],
-    pathsChanged: string[],
-  },
-  moduleRemoved: {
-  },
+    names: string[]
+    pathsChanged: string[]
+  }
+  moduleRemoved: {}
 
   // TaskGraph events
   taskPending: {
-    addedAt: Date,
-    key: string,
-    version: ModuleVersion,
-  },
+    addedAt: Date
+    key: string
+    version: ModuleVersion
+  }
   taskProcessing: {
-    startedAt: Date,
-    key: string,
-    version: ModuleVersion,
-  },
+    startedAt: Date
+    key: string
+    version: ModuleVersion
+  }
   taskCancelled: {
-    cancelledAt: Date,
+    cancelledAt: Date
     type: string
-    key: string,
-    name: string,
-  },
-  taskComplete: TaskResult,
-  taskError: TaskResult,
+    key: string
+    name: string
+  }
+  taskComplete: TaskResult
+  taskError: TaskResult
   taskGraphProcessing: {
-    startedAt: Date,
-  },
+    startedAt: Date
+  }
   taskGraphComplete: {
-    completedAt: Date,
-  },
+    completedAt: Date
+  }
 }
 
 export type EventName = keyof Events

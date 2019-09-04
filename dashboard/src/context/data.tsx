@@ -39,34 +39,34 @@ export interface RenderedNodeWithStatus extends RenderedNode {
   status?: SupportedEventName
 }
 export interface GraphOutputWithNodeStatus extends GraphOutput {
-  nodes: RenderedNodeWithStatus[],
+  nodes: RenderedNodeWithStatus[]
 }
 
 // This is the global data store
 interface Store {
   config: StoreCommon & {
-    data?: ConfigDump,
-  },
+    data?: ConfigDump
+  }
   status: StoreCommon & {
-    data?: StatusCommandResult,
-  },
+    data?: StatusCommandResult
+  }
   graph: StoreCommon & {
-    data?: GraphOutputWithNodeStatus,
-  },
+    data?: GraphOutputWithNodeStatus
+  }
   logs: StoreCommon & {
-    data?: ServiceLogEntry[],
-  },
+    data?: ServiceLogEntry[]
+  }
   taskResult: StoreCommon & {
-    data?: TaskResultOutput,
-  },
+    data?: TaskResultOutput
+  }
   testResult: StoreCommon & {
-    data?: TestResultOutput,
-  },
+    data?: TestResultOutput
+  }
 }
 
 type Context = {
-  store: Store;
-  actions: Actions;
+  store: Store
+  actions: Actions
 }
 
 type StoreKey = keyof Store
@@ -101,8 +101,14 @@ interface ActionError extends ActionBase {
 type Action = ActionStart | ActionError | ActionSuccess
 
 export type LoadLogs = (param: FetchLogsParam, force?: boolean) => void
-export type LoadTaskResult = (param: FetchTaskResultParam, force?: boolean) => void
-export type LoadTestResult = (param: FetchTestResultParam, force?: boolean) => void
+export type LoadTaskResult = (
+  param: FetchTaskResultParam,
+  force?: boolean
+) => void
+export type LoadTestResult = (
+  param: FetchTestResultParam,
+  force?: boolean
+) => void
 
 type Loader = (force?: boolean) => void
 interface Actions {
@@ -114,11 +120,14 @@ interface Actions {
   loadTestResult: LoadTestResult
 }
 
-const initialState: Store = storeKeys.reduce<Store>((acc, key) => {
-  const state = { loading: false }
-  acc[key] = state
-  return acc
-}, {} as Store)
+const initialState: Store = storeKeys.reduce<Store>(
+  (acc, key) => {
+    const state = { loading: false }
+    acc[key] = state
+    return acc
+  },
+  {} as Store
+)
 
 /**
  * Updates slices of the store based on the slice key
@@ -126,7 +135,7 @@ const initialState: Store = storeKeys.reduce<Store>((acc, key) => {
 function updateSlice(
   prevState: Store,
   key: StoreKey,
-  sliceState: Partial<Store[StoreKey]>,
+  sliceState: Partial<Store[StoreKey]>
 ): Store {
   const prevSliceState = prevState[key]
   return {
@@ -146,9 +155,16 @@ function reducer(store: Store, action: Action) {
     case "fetchStart":
       return updateSlice(store, action.key, { loading: true, error: undefined })
     case "fetchSuccess":
-      return updateSlice(store, action.key, { loading: false, data: action.data, error: undefined })
+      return updateSlice(store, action.key, {
+        loading: false,
+        data: action.data,
+        error: undefined,
+      })
     case "fetchFailure":
-      return updateSlice(store, action.key, { loading: false, error: action.error })
+      return updateSlice(store, action.key, {
+        loading: false,
+        error: action.error,
+      })
   }
 }
 
@@ -171,30 +187,39 @@ function useApi() {
     }
   }
 
-  const fetchOrReadFromStore = <T extends Function>(key: StoreKey, action: T, force: boolean, args: any[] = []) => {
+  const fetchOrReadFromStore = <T extends Function>(
+    key: StoreKey,
+    action: T,
+    force: boolean,
+    args: any[] = []
+  ) => {
     const { data, loading } = store[key]
     if (!force && (data || loading)) {
       return
     }
-    fetch(key, action, args).catch(error => dispatch({ key, error, type: "fetchFailure" }))
+    fetch(key, action, args).catch(error =>
+      dispatch({ key, error, type: "fetchFailure" })
+    )
   }
 
-  const loadLogs: LoadLogs = (args: FetchLogsParam, force: boolean = false) => (
+  const loadLogs: LoadLogs = (args: FetchLogsParam, force: boolean = false) =>
     fetchOrReadFromStore("logs", fetchLogs, force, [args])
-  )
-  const loadConfig: Loader = (force: boolean = false) => (
+  const loadConfig: Loader = (force: boolean = false) =>
     fetchOrReadFromStore("config", fetchConfig, force)
-  )
-  const loadGraph: Loader = (force: boolean = false) => (
+  const loadGraph: Loader = (force: boolean = false) =>
     fetchOrReadFromStore("graph", fetchGraph, force)
-  )
-  const loadStatus: Loader = (force: boolean = false) => (
+  const loadStatus: Loader = (force: boolean = false) =>
     fetchOrReadFromStore("status", fetchStatus, force)
-  )
-  const loadTaskResult: LoadTaskResult = (args: FetchTaskResultParam, force: boolean = false) => {
+  const loadTaskResult: LoadTaskResult = (
+    args: FetchTaskResultParam,
+    force: boolean = false
+  ) => {
     return fetchOrReadFromStore("taskResult", fetchTaskResult, force, [args])
   }
-  const loadTestResult: LoadTestResult = (args: FetchTestResultParam, force: boolean = false) => {
+  const loadTestResult: LoadTestResult = (
+    args: FetchTestResultParam,
+    force: boolean = false
+  ) => {
     return fetchOrReadFromStore("testResult", fetchTestResult, force, [args])
   }
 

@@ -44,7 +44,7 @@ const responsiveImage = css`
 const withoutLhTopSpace = (fontSize, lineHeight) => {
   return css`
     &::before {
-      content: '';
+      content: "";
       display: block;
       height: 0;
       width: 0;

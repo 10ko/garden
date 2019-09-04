@@ -28,7 +28,7 @@ const Module = styled.div`
 `
 
 type EntityCardsProps = {
-  visible: boolean,
+  visible: boolean
 }
 const EntityCards = styled.div<EntityCardsProps>`
   padding-top: 1rem;
@@ -36,7 +36,7 @@ const EntityCards = styled.div<EntityCardsProps>`
   flex-wrap: wrap;
   align-items: middle;
   display: ${props => (props.visible ? `block` : "none")};
-  animation: fadein .5s ;
+  animation: fadein 0.5s;
 
   @keyframes fadein {
     from {
@@ -49,11 +49,11 @@ const EntityCards = styled.div<EntityCardsProps>`
 `
 
 type FieldsProps = {
-  visible: boolean,
+  visible: boolean
 }
 const Fields = styled.div<FieldsProps>`
   display: ${props => (props.visible ? `block` : "none")};
-  animation: fadein .5s;
+  animation: fadein 0.5s;
   @keyframes fadein {
     from {
       opacity: 0;
@@ -76,55 +76,56 @@ const Name = styled.div`
   font-weight: 500;
   font-size: 0.9375rem;
   letter-spacing: 0.01em;
-  color: #323C47;
+  color: #323c47;
 `
 
 const Tag = styled.div`
-  padding-left: .5rem;
+  padding-left: 0.5rem;
   font-weight: 500;
   font-size: 0.625rem;
   letter-spacing: 0.01em;
-  color: #90A0B7;
+  color: #90a0b7;
 `
 
 type FieldProps = {
-  inline?: boolean,
-  visible: boolean,
+  inline?: boolean
+  visible: boolean
 }
 const Field = styled.div<FieldProps>`
-  display: ${props => (props.visible ? (props.inline ? "flex" : "block") : "none")};
+  display: ${props =>
+    props.visible ? (props.inline ? "flex" : "block") : "none"};
   flex-direction: row;
 `
 
 type FieldGroupProps = {
-  visible: boolean,
+  visible: boolean
 }
 const FieldGroup = styled.div<FieldGroupProps>`
   display: ${props => (props.visible ? "flex" : "none")};
   flex-direction: row;
-  padding-top: .25rem;
+  padding-top: 0.25rem;
 `
 
 const Key = styled.div`
-  padding-right: .25rem;
+  padding-right: 0.25rem;
   font-size: 0.8125rem;
   line-height: 1.1875rem;
   letter-spacing: 0.01em;
-  color: #4C5862;
+  color: #4c5862;
   opacity: 0.5;
 `
 
 const Value = styled.div`
-  padding-right: .5rem;
+  padding-right: 0.5rem;
   font-size: 0.8125rem;
   line-height: 1.1875rem;
   letter-spacing: 0.01em;
 `
 
 const Description = styled(Field)`
-  color: #4C5862;
+  color: #4c5862;
   opacity: 0.5;
-  padding-top: .25rem;
+  padding-top: 0.25rem;
 `
 
 const Full = styled(Value)`
@@ -146,23 +147,23 @@ export default ({
   module: { services = [], tests = [], tasks = [], name, type, description },
 }: ModuleProp) => {
   const {
-    state: { overview: { filters } },
+    state: {
+      overview: { filters },
+    },
     actions: { selectEntity },
   } = useContext(UiStateContext)
 
   const [isValueExpended, setValueExpendedState] = useState(false)
-  const toggleValueExpendedState = () => (setValueExpendedState(!isValueExpended))
-  const handleSelectEntity = (
-    {
-      moduleName,
-      entityName,
-      entityType,
-    }:
-      {
-        moduleName: string,
-        entityName: string,
-        entityType: "test" | "task",
-      }) => {
+  const toggleValueExpendedState = () => setValueExpendedState(!isValueExpended)
+  const handleSelectEntity = ({
+    moduleName,
+    entityName,
+    entityType,
+  }: {
+    moduleName: string
+    entityName: string
+    entityType: "test" | "task"
+  }) => {
     if (moduleName && entityName && entityType) {
       selectEntity({
         type: entityType,
@@ -190,17 +191,15 @@ export default ({
       </Fields>
       <EntityCards visible={filters.services && services.length > 0}>
         {services.map(service => (
-          <EntityCard
-            key={service.name}
-            entity={service}
-            type={"service"}
-          >
+          <EntityCard key={service.name} entity={service} type={"service"}>
             <Fields visible={filters.servicesInfo}>
               <Field inline visible={service.dependencies.length > 0}>
                 <Key>Depends on:</Key>
                 <Value>{service.dependencies.join(", ")}</Value>
               </Field>
-              <Field visible={!!service.ingresses && service.ingresses.length > 0}>
+              <Field
+                visible={!!service.ingresses && service.ingresses.length > 0}
+              >
                 <Ingresses ingresses={service.ingresses} />
               </Field>
             </Fields>
@@ -209,11 +208,7 @@ export default ({
       </EntityCards>
       <EntityCards visible={filters.tests && tests.length > 0}>
         {tests.map(test => (
-          <EntityCard
-            key={test.name}
-            entity={test}
-            type={"test"}
-          >
+          <EntityCard key={test.name} entity={test} type={"test"}>
             <Fields visible={filters.testsInfo}>
               <Field inline visible={test.dependencies.length > 0}>
                 <Key>Depends on:</Key>
@@ -248,11 +243,7 @@ export default ({
       </EntityCards>
       <EntityCards visible={filters.tasks && tasks.length > 0}>
         {tasks.map(task => (
-          <EntityCard
-            key={task.name}
-            entity={task}
-            type={"task"}
-          >
+          <EntityCard key={task.name} entity={task} type={"task"}>
             <Fields visible={filters.tasksInfo}>
               <Field inline visible={task.dependencies.length > 0}>
                 <Key>Depends on:</Key>
@@ -295,17 +286,17 @@ const ShowResultButton = ({
   moduleName,
   onClick,
 }: {
-  entityName: string,
-  entityType: "test" | "task",
-  moduleName: string,
-  onClick,
+  entityName: string
+  entityType: "test" | "task"
+  moduleName: string
+  onClick
 }) => {
   const handleClick = () => onClick({ entityName, moduleName, entityType })
   return (
     <TertiaryButton
       onClick={handleClick}
       className={css`
-        margin-top: .5rem;
+        margin-top: 0.5rem;
       `}
     >
       Show result

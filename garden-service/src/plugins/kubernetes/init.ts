@@ -44,7 +44,7 @@ export async function getEnvironmentStatus({ ctx, log }: GetEnvironmentStatusPar
   const namespaces = await prepareNamespaces({ ctx, log })
 
   // Check Tiller status in project namespace
-  if (await checkTillerStatus(k8sCtx, log) !== "ready") {
+  if ((await checkTillerStatus(k8sCtx, log)) !== "ready") {
     projectReady = false
   }
 
@@ -70,8 +70,7 @@ export async function getEnvironmentStatus({ ctx, log }: GetEnvironmentStatusPar
 
   if (
     // No need to continue if we don't need any system services
-    systemServiceNames.length === 0
-    ||
+    systemServiceNames.length === 0 ||
     // Make sure we don't recurse infinitely
     provider.config.namespace === systemNamespace
   ) {
@@ -138,9 +137,13 @@ export async function prepareEnvironment(params: PrepareEnvironmentParams): Prom
   return { status: { ready: true, outputs: status.outputs } }
 }
 
-export async function prepareSystem(
-  { ctx, log, force, status, clusterInit }: PrepareEnvironmentParams & { clusterInit: boolean },
-) {
+export async function prepareSystem({
+  ctx,
+  log,
+  force,
+  status,
+  clusterInit,
+}: PrepareEnvironmentParams & { clusterInit: boolean }) {
   const k8sCtx = <KubernetesPluginContext>ctx
   const provider = k8sCtx.provider
   const variables = getKubernetesSystemVariables(provider.config)
@@ -153,7 +156,7 @@ export async function prepareSystem(
   }
 
   const serviceStatuses: ServiceStatusMap = (status.detail && status.detail.serviceStatuses) || {}
-  const serviceStates = Object.values(serviceStatuses).map(s => s.state!)
+  const serviceStates = Object.values(serviceStatuses).map((s) => s.state!)
   const combinedState = combineStates(serviceStates)
 
   const remoteCluster = provider.name !== "local-kubernetes"
@@ -184,13 +187,16 @@ export async function prepareSystem(
       return {}
     }
 
-    throw new KubernetesError(deline`
+    throw new KubernetesError(
+      deline`
       One or more cluster-wide system services are missing or not ready. You need to run
       \`garden --env=${ctx.environmentName} plugins kubernetes cluster-init\`
       to initialize them, or contact a cluster admin to do so, before deploying services to this cluster.
-    `, {
-      status,
-    })
+    `,
+      {
+        status,
+      }
+    )
   }
 
   // Install Tiller to system namespace

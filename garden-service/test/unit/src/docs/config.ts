@@ -9,30 +9,38 @@ import dedent = require("dedent")
 import { joiArray, joi, joiEnvVars } from "../../../../src/config/common"
 
 describe("config", () => {
-  const servicePortSchema = joi.number().default((context) => context.containerPort, "<same as containerPort>")
+  const servicePortSchema = joi
+    .number()
+    .default((context) => context.containerPort, "<same as containerPort>")
     .example("8080")
     .description("description")
 
-  const testDefaultSchema = joi.number().default(() => "result", "default value")
+  const testDefaultSchema = joi
+    .number()
+    .default(() => "result", "default value")
     .description("description")
 
-  const testObject = joi.object()
+  const testObject = joi
+    .object()
     .keys({
-      testKeyA: joi.number()
+      testKeyA: joi
+        .number()
         .required()
         .description("key a"),
-      testKeyB: joi.string()
+      testKeyB: joi
+        .string()
         .only("b")
         .description("key b"),
     })
     .description("test object")
 
-  const testArray = joiArray(servicePortSchema)
-    .description("test array")
+  const testArray = joiArray(servicePortSchema).description("test array")
 
-  const portSchema = joi.object()
+  const portSchema = joi
+    .object()
     .keys({
-      containerPort: joi.number()
+      containerPort: joi
+        .number()
         .required()
         .description("description"),
       servicePort: servicePortSchema,
@@ -44,7 +52,9 @@ describe("config", () => {
   describe("renderSchemaDescriptionYaml", () => {
     it("should render correct yaml", () => {
       const schemaDescriptions = normalizeDescriptions(portSchema.describe())
-      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, { showRequired: true })
+      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, {
+        showRequired: true,
+      })
       expect(yaml).to.equal(dedent`
         # description
         #
@@ -94,7 +104,9 @@ describe("config", () => {
     })
     it("should conditionally skip the commented description above the key", () => {
       const schemaDescriptions = normalizeDescriptions(portSchema.describe())
-      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, { showComment: false })
+      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, {
+        showComment: false,
+      })
       expect(yaml).to.equal(dedent`
         containerPort:
         servicePort: <same as containerPort>
@@ -106,10 +118,10 @@ describe("config", () => {
     })
     it("should conditionally print ellipsis between object keys", () => {
       const schemaDescriptions = normalizeDescriptions(portSchema.describe())
-      const yaml = renderSchemaDescriptionYaml(
-        schemaDescriptions,
-        { showComment: false, showEllipsisBetweenKeys: true },
-      )
+      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, {
+        showComment: false,
+        showEllipsisBetweenKeys: true,
+      })
       expect(yaml).to.equal(dedent`
         containerPort:
         servicePort: <same as containerPort>
@@ -123,19 +135,18 @@ describe("config", () => {
     })
 
     it("should correctly render object example values", () => {
-      const schema = joi.object()
-        .keys({
-          env: joiEnvVars()
-            .example({
-              foo: "bar",
-              boo: "far",
-            }),
-        })
+      const schema = joi.object().keys({
+        env: joiEnvVars().example({
+          foo: "bar",
+          boo: "far",
+        }),
+      })
       const schemaDescriptions = normalizeDescriptions(schema.describe())
-      const yaml = renderSchemaDescriptionYaml(
-        schemaDescriptions,
-        { showComment: false, showEllipsisBetweenKeys: true, useExampleForValue: true },
-      )
+      const yaml = renderSchemaDescriptionYaml(schemaDescriptions, {
+        showComment: false,
+        showEllipsisBetweenKeys: true,
+        useExampleForValue: true,
+      })
       expect(yaml).to.equal(dedent`
         env:
             foo: bar
@@ -231,5 +242,4 @@ describe("config", () => {
       `)
     })
   })
-
 })

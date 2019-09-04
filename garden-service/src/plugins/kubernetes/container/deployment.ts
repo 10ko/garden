@@ -63,7 +63,7 @@ export async function createContainerObjects(
   log: LogEntry,
   service: ContainerService,
   runtimeContext: RuntimeContext,
-  enableHotReload: boolean,
+  enableHotReload: boolean
 ) {
   const k8sCtx = <KubernetesPluginContext>ctx
   const version = service.module.version
@@ -71,12 +71,19 @@ export async function createContainerObjects(
   const namespace = await getAppNamespace(k8sCtx, log, provider)
   const api = await KubeApi.factory(log, provider)
   const ingresses = await createIngressResources(api, provider, namespace, service)
-  const deployment = await createDeployment({ provider, service, runtimeContext, namespace, enableHotReload, log })
+  const deployment = await createDeployment({
+    provider,
+    service,
+    runtimeContext,
+    namespace,
+    enableHotReload,
+    log,
+  })
   const kubeservices = await createServiceResources(service, namespace)
 
   const objects = [deployment, ...kubeservices, ...ingresses]
 
-  return objects.map(obj => {
+  return objects.map((obj) => {
     set(obj, ["metadata", "annotations", gardenAnnotationKey("generated")], "true")
     set(obj, ["metadata", "annotations", gardenAnnotationKey("version")], version.versionString)
     set(obj, ["metadata", "labels", "module"], service.module.name)
@@ -86,18 +93,22 @@ export async function createContainerObjects(
 }
 
 interface CreateDeploymentParams {
-  provider: KubernetesProvider,
-  service: ContainerService,
-  runtimeContext: RuntimeContext,
-  namespace: string,
-  enableHotReload: boolean,
-  log: LogEntry,
+  provider: KubernetesProvider
+  service: ContainerService
+  runtimeContext: RuntimeContext
+  namespace: string
+  enableHotReload: boolean
+  log: LogEntry
 }
 
-export async function createDeployment(
-  { provider, service, runtimeContext, namespace, enableHotReload, log }: CreateDeploymentParams,
-): Promise<KubernetesResource> {
-
+export async function createDeployment({
+  provider,
+  service,
+  runtimeContext,
+  namespace,
+  enableHotReload,
+  log,
+}: CreateDeploymentParams): Promise<KubernetesResource> {
   const spec = service.spec
   let configuredReplicas = service.spec.replicas
   const deployment: any = deploymentConfig(service, configuredReplicas, namespace)
@@ -198,7 +209,7 @@ export async function createDeployment(
       type: "RollingUpdate",
     }
 
-    for (const port of ports.filter(p => p.hostPort)) {
+    for (const port of ports.filter((p) => p.hostPort)) {
       // For daemons we can expose host ports directly on the Pod, as opposed to only via the Service resource.
       // This allows us to choose any port.
       // TODO: validate that conflicting ports are not defined.
@@ -208,7 +219,6 @@ export async function createDeployment(
         hostPort: port.hostPort,
       })
     }
-
   } else {
     deployment.spec.replicas = configuredReplicas
 
@@ -225,7 +235,7 @@ export async function createDeployment(
 
   if (provider.config.imagePullSecrets.length > 0) {
     // add any configured imagePullSecrets
-    deployment.spec.template.spec.imagePullSecrets = provider.config.imagePullSecrets.map(s => ({ name: s.name }))
+    deployment.spec.template.spec.imagePullSecrets = provider.config.imagePullSecrets.map((s) => ({ name: s.name }))
   }
 
   // this is important for status checks to work correctly, because how K8s normalizes resources
@@ -259,7 +269,6 @@ export async function createDeployment(
 }
 
 function deploymentConfig(service: Service, configuredReplicas: number, namespace: string): object {
-
   const labels = {
     module: service.module.name,
     service: service.name,
@@ -305,11 +314,9 @@ function deploymentConfig(service: Service, configuredReplicas: number, namespac
       },
     },
   }
-
 }
 
 function configureHealthCheck(container, spec): void {
-
   const readinessPeriodSeconds = 1
   const readinessFailureThreshold = 90
 
@@ -342,7 +349,9 @@ function configureHealthCheck(container, spec): void {
     container.readinessProbe.httpGet = httpGet
     container.livenessProbe.httpGet = httpGet
   } else if (spec.healthCheck.command) {
-    container.readinessProbe.exec = { command: spec.healthCheck.command.map(s => s.toString()) }
+    container.readinessProbe.exec = {
+      command: spec.healthCheck.command.map((s) => s.toString()),
+    }
     container.livenessProbe.exec = container.readinessProbe.exec
   } else if (spec.healthCheck.tcpPort) {
     container.readinessProbe.tcpSocket = {
@@ -352,7 +361,6 @@ function configureHealthCheck(container, spec): void {
   } else {
     throw new Error("Must specify type of health check when configuring health check.")
   }
-
 }
 
 function configureVolumes(deployment, container, spec): void {
@@ -402,8 +410,7 @@ function configureVolumes(deployment, container, spec): void {
  * converts /src/foo into src/foo/
  */
 export function rsyncTargetPath(path: string) {
-  return path.replace(/^\/*/, "")
-    .replace(/\/*$/, "/")
+  return path.replace(/^\/*/, "").replace(/\/*$/, "/")
 }
 
 export async function deleteService(params: DeleteServiceParams): Promise<ServiceStatus> {
@@ -412,7 +419,12 @@ export async function deleteService(params: DeleteServiceParams): Promise<Servic
   const namespace = await getAppNamespace(k8sCtx, log, k8sCtx.provider)
   const provider = k8sCtx.provider
 
-  await deleteContainerDeployment({ namespace, provider, serviceName: service.name, log })
+  await deleteContainerDeployment({
+    namespace,
+    provider,
+    serviceName: service.name,
+    log,
+  })
   await deleteObjectsByLabel({
     log,
     provider,
@@ -426,11 +438,17 @@ export async function deleteService(params: DeleteServiceParams): Promise<Servic
   return { state: "missing" }
 }
 
-export async function deleteContainerDeployment(
-  { namespace, provider, serviceName, log }:
-    { namespace: string, provider: KubernetesProvider, serviceName: string, log: LogEntry },
-) {
-
+export async function deleteContainerDeployment({
+  namespace,
+  provider,
+  serviceName,
+  log,
+}: {
+  namespace: string
+  provider: KubernetesProvider
+  serviceName: string
+  log: LogEntry
+}) {
   let found = true
   const api = await KubeApi.factory(log, provider)
 
