@@ -288,3 +288,38 @@ export function prepareEnvVars(env: ContainerEnvVars): V1EnvVar[] {
       }
     })
 }
+
+/**
+ * Makes sure a Kubernetes manifest has an up-to-date API version.
+ * See https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/
+ *
+ * @param manifest any Kubernetes manifest
+ */
+export function convertDeprecatedManifestVersion(manifest: KubernetesResource): KubernetesResource {
+  const { apiVersion, kind } = manifest
+
+  if (workloadTypes.includes(kind)) {
+    manifest.apiVersion = "apps/v1"
+  } else if (apiVersion === "extensions/v1beta1") {
+    switch (kind) {
+      case "NetworkPolicy":
+        manifest.apiVersion = "networking.k8s.io/v1"
+        break
+
+      case "PodSecurityPolicy":
+        manifest.apiVersion = "policy/v1beta1"
+        break
+    }
+  }
+
+  // apps/v1/Deployment requires spec.selector to be set
+  if (kind === "Deployment") {
+    if (manifest.spec && !manifest.spec.selector) {
+      manifest.spec.selector = {
+        ...{ matchLabels: manifest.spec.template.metadata.labels || manifest.metadata.labels },
+      }
+    }
+  }
+
+  return manifest
+}
