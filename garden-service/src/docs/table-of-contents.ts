@@ -28,6 +28,8 @@ import dtree = require("directory-tree")
 import { readFileSync, writeFile, createFile } from "fs-extra"
 import { resolve } from "path"
 import { cloneDeep, repeat } from "lodash"
+import titleize = require("titleize")
+import humanizeString = require("humanize-string")
 
 interface Metadata {
   order: number
@@ -36,6 +38,7 @@ interface Metadata {
 
 interface FileTree extends dtree.DirectoryTree, Metadata {
   children: FileTree[]
+  emptyDir: boolean
 }
 
 function createNewTree(tree: FileTree, transform: Function): FileTree {
@@ -46,7 +49,12 @@ function createNewTree(tree: FileTree, transform: Function): FileTree {
 
 function attachMetadata(tree: FileTree) {
   if (tree.type === "directory") {
-    tree.path = tree.path + "/README.md"
+    if (tree.children.length > 0) {
+      tree.path = resolve(tree.path, "README.md")
+    } else {
+      tree.emptyDir = true
+      return
+    }
   }
   let file: string | undefined
   try {
@@ -54,6 +62,8 @@ function attachMetadata(tree: FileTree) {
   } catch (e) {
     if (e.code !== "ENOENT") {
       throw (e)
+    } else {
+      tree.path = tree.children[0].path
     }
   }
   if (file) {
@@ -74,7 +84,7 @@ function attachMetadata(tree: FileTree) {
       }
     }
   } else {
-    tree.title = tree.name
+    tree.title = titleize(humanizeString(tree.name))
   }
   if (tree.children) {
     for (let item in tree.children) {
@@ -104,7 +114,7 @@ function generateMarkdown(tree: FileTree, docsRoot: string, depth = 0) {
     output = ""
     depth = -1
   }
-  if (tree.name === "README.md") {
+  if (tree.name === "README.md" || tree.emptyDir === true) {
     output = ""
   }
   for (let item in tree.children) {
