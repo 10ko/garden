@@ -100,6 +100,6 @@ The app is structured into presentational components (`src/components`), contain
 
 **Container components:** These load data and pass to the presentational components. A container might call the API directly or obtain the data from a consumer component (or both).
 
-**Contexts components:** [Contexts](https://reactjs.org/docs/context.html) contain "global" state that needs to be accessible by other components down the tree. The Context components use the [React Hooks API](https://reactjs.org/docs/hooks-intro.html) to create actions and manage the state that gets passed down.
+**Context components:** [A Context](https://reactjs.org/docs/context.html) contains "global" state that needs to be accessible by other components down the tree. The context components use the [React Hooks API](https://reactjs.org/docs/hooks-intro.html) to create actions and manage the state that gets passed down.
 
 Maintaining this separation will make it easier to migrate to different state management patterns/tools as the app evolves.

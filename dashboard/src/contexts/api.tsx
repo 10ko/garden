@@ -113,7 +113,7 @@ export interface Store {
   entities: {
     modules: { [moduleName: string]: Module }
     services: { [serviceName: string]: Service }
-    tasks: { [taskId: string]: Task }
+    tasks: { [taskName: string]: Task }
     tests: { [testKey: string]: Test }
     logs: { [serviceName: string]: ServiceLogEntry[] }
     graph: GraphOutput,

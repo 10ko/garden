@@ -211,10 +211,10 @@ export class TaskGraph {
         const name = task.getName()
         const type = node.getType()
         const key = node.getKey()
-        const completedAt = new Date()
         const description = node.getDescription()
 
-        let result: TaskResult = { type, description, key, name, completedAt }
+        let result: TaskResult
+        let success = true
 
         try {
           this.logTask(node)
@@ -243,16 +243,18 @@ export class TaskGraph {
 
             this.garden.events.emit("taskComplete", result)
           } catch (error) {
-            result.error = error
+            success = false
+            result = { type, description, key, name, error, completedAt: new Date() }
             this.garden.events.emit("taskError", result)
             this.logTaskError(node, error)
             this.cancelDependants(node)
           } finally {
-            results[key] = result
-            this.resultCache.put(key, task.version.versionString, result)
+            // We know the result got assigned in either the try or catch clause
+            results[key] = result!
+            this.resultCache.put(key, task.version.versionString, result!)
           }
         } finally {
-          this.completeTask(node, !result.error)
+          this.completeTask(node, success)
         }
 
         return loop()

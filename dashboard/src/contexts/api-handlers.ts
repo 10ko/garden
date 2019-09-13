@@ -73,7 +73,7 @@ export async function loadConfigHandler({ store, dispatch, force = false }: Load
 function processConfig(store: Store, config: ConfigDump) {
   let modules: { [moduleName: string]: Module } = {}
   let services: { [serviceName: string]: Service } = {}
-  let tasks: { [taskId: string]: Task } = {}
+  let tasks: { [taskName: string]: Task } = {}
   let tests: { [testKey: string]: Test } = {}
 
   for (const cfg of config.moduleConfigs) {
