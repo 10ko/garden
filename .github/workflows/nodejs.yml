@@ -22,11 +22,12 @@ jobs:
         echo "${{ secrets.DEPLOY_KEY_HOMEBREW_GARDEN }}" > fifo | ssh-add -K fifo
         sudo git config user.email "e.libralato@gmail.com"
         sudo git config user.name "Github Actions"
+        tee -a ~/.ssh/config << END
+        Host localhost
+          ForwardAgent yes
+        END
     - name: npm install
       run: |
-        echo ------------------------
-        cat ~/.ssh/config
-        echo ------------------------
         git config user.name
         npm install
         npm install -g gulp
