@@ -24,6 +24,9 @@ jobs:
         sudo git config user.name "Github Actions"
     - name: npm install
       run: |
+        echo ------------------------
+        cat ~/.ssh/config
+        echo ------------------------
         git config user.name
         npm install
         npm install -g gulp
