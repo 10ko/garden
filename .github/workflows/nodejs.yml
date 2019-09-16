@@ -24,6 +24,7 @@ jobs:
         sudo git config user.name "Github Action"
     - name: npm install
       run: |
+        git config user.name
         npm install
         npm install -g gulp
         npm install fsevents@latest
