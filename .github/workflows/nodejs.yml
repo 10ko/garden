@@ -19,12 +19,15 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
         mkfifo -m 600 fifo
-        echo "${{ secrets.DEPLOY_KEY_HOMEBREW_GARDEN }}" > fifo | ssh-add -K fifo
+        echo "${{ secrets.DEPLOY_KEY_HOMEBREW_GARDEN }}" > homebrew_id | ssh-add -K homebrew_id
         sudo git config user.email "e.libralato@gmail.com"
         sudo git config user.name "Github Actions"
+        ls -al ~/.ssh
         tee -a ~/.ssh/config << END
-        Host localhost
-          ForwardAgent yes
+        Host github.com
+            AddKeysToAgent yes
+            UseKeychain yes
+            IdentityFile ~/.ssh/homebrew_id
         END
     - name: npm install
       run: |
