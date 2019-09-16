@@ -20,8 +20,8 @@ jobs:
         ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
         mkfifo -m 600 fifo
         echo "${{ secrets.DEPLOY_KEY_HOMEBREW_GARDEN }} > fifo | ssh-add -K fifo
-        sudo git config user.email "admin@garden.io"
-        sudo git config user.name "Github Action"
+        # sudo git config user.email "admin@garden.io"
+        # sudo git config user.name "Github Action"
     - name: npm install
       run: |
         npm install
