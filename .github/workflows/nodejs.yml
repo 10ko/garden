@@ -18,7 +18,7 @@ jobs:
         eval "$(ssh-agent -s)"
         mkdir -p ~/.ssh
         ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-        mkfifo -m 600 fifo
+        mkfifo -m 600 homebrew_id
         echo "${{ secrets.DEPLOY_KEY_HOMEBREW_GARDEN }}" > homebrew_id | ssh-add -K homebrew_id
         sudo git config user.email "e.libralato@gmail.com"
         sudo git config user.name "Github Actions"
