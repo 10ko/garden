@@ -45,7 +45,7 @@ gulp.task("update-brew", async () => {
   if (await pathExists(brewRepoDir)) {
     await remove(brewRepoDir)
   }
-  await execa("git", ["clone", "git@github.com:garden-io/homebrew-garden.git"], { cwd: tmpDir })
+  await execa("git", ["clone", "git@github.com:10ko/homebrew-garden.git"], { cwd: tmpDir })
 
   // read the existing formula
   console.log("Reading currently published formula")
@@ -60,7 +60,7 @@ gulp.task("update-brew", async () => {
   // get the metadata from GitHub
   console.log("Preparing formula")
   const octokit = new Octokit()
-  const repoName = "garden-io/garden"
+  const repoName = "10ko/garden"
 
   // note: this excludes pre-releases
   const latestRelease = await octokit.request(`GET /repos/${repoName}/releases/latest`)
