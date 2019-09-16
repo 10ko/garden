@@ -1,4 +1,20 @@
 
+<a name="v0.11.0"></a>
+## [v0.11.0](https://github.com/garden-io/garden/compare/v-new-version-01...v0.11.0) (2019-09-16)
+
+
+<a name="v-new-version-01"></a>
+## [v-new-version-01](https://github.com/garden-io/garden/compare/v-test-version...v-new-version-01) (2019-09-16)
+
+
+<a name="v-test-version"></a>
+## [v-test-version](https://github.com/garden-io/garden/compare/v0.10.9...v-test-version) (2019-09-16)
+
+### Code Refactoring
+
+* change `varFile` parameter name to `varfile` ([71e37fbf](https://github.com/garden-io/garden/commit/71e37fbf))
+
+
 <a name="v0.10.9"></a>
 ## [v0.10.9](https://github.com/garden-io/garden/compare/v0.10.8...v0.10.9) (2019-09-11)
 
