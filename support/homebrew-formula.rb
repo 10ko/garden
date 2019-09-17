@@ -13,7 +13,7 @@ class GardenCli < Formula
   end
 
   test do
-    # just make sure the command works
+    # just make sure the command works.
     system bin/"garden", "--help"
   end
 end
