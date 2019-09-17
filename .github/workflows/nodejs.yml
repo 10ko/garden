@@ -29,12 +29,11 @@ jobs:
             UseKeychain yes
             IdentityFile ~/.ssh/homebrew_id
         END
-    - name: npm install
-      run: |
-        git config user.name
-        npm install
-        npm install -g gulp
-        npm install fsevents@latest
-        mkdir -p tmp
-        git clone git@github.com:10ko/homebrew-garden.git
-        gulp update-brew
+    - name: release homebrew
+      uses: garden-io/update-homebrew-action@v1
+      with:
+        packageName: 'garden-cli'
+        templatePath: 'support/homebrew-formula.rb'
+        authToken: ${{ secrets.GITHUB_TOKEN }}
+        tapRepo: '10ko/homebrew-garden'
+        srcRepo: '10ko/garden'
