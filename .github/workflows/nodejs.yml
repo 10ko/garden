@@ -36,3 +36,4 @@ jobs:
         templatePath: 'support/homebrew-formula.rb'
         tapRepo: '10ko/homebrew-garden'
         srcRepo: '10ko/garden'
+        authToken: ${{ secrets.GITHUB_TOKEN }}
