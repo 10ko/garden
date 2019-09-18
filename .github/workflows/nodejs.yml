@@ -34,6 +34,5 @@ jobs:
       with:
         packageName: 'garden-cli'
         templatePath: 'support/homebrew-formula.rb'
-        authToken: ${{ secrets.GITHUB_TOKEN }}
         tapRepo: '10ko/homebrew-garden'
         srcRepo: '10ko/garden'
