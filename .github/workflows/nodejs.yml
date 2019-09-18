@@ -29,7 +29,7 @@ jobs:
             UseKeychain yes
             IdentityFile ~/.ssh/homebrew_id
         END
-    - name: release homebrew
+    - name: Release Homebrew
       uses: garden-io/update-homebrew-action@v1
       with:
         packageName: 'garden-cli'
@@ -37,3 +37,8 @@ jobs:
         tapRepo: '10ko/homebrew-garden'
         srcRepo: '10ko/garden'
         authToken: ${{ secrets.GITHUB_TOKEN }}
+    - name: Test Homebrew package
+      run: |
+        brew tap garden-io/garden
+        brew install garden-cli
+        garden --version
