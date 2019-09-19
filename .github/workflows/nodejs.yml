@@ -11,11 +11,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      if: github.event.release.prereleased != true
     - name: Use Node.js 12.x
+      if: github.event.release.prereleased != true
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
     - name: Setup git
+      if: github.event.release.prereleased != true
       run: |
         eval "$(ssh-agent -s)"
         mkdir -p ~/.ssh
@@ -32,7 +35,7 @@ jobs:
             IdentityFile ~/.ssh/homebrew_id
         END
     - name: Release Homebrew
-      if: !github.event.release.prereleased
+      if: github.event.release.prereleased != true
       uses: garden-io/update-homebrew-action@v1
       with:
         packageName: 'garden-cli'
@@ -41,7 +44,7 @@ jobs:
         srcRepo: '10ko/garden'
         authToken: ${{ secrets.GITHUB_TOKEN }}
     - name: Test Homebrew package
-      if: !github.event.release.prereleased
+      if: github.event.release.prereleased != true
       run: |
         echo 'Testing brew install'
         brew tap garden-io/garden
