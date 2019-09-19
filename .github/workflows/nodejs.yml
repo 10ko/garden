@@ -32,7 +32,7 @@ jobs:
             IdentityFile ~/.ssh/homebrew_id
         END
     - name: Release Homebrew
-      if: ${{ !github.event.release.prereleased }}
+      if: github.event.release.prereleased != true
       uses: garden-io/update-homebrew-action@v1
       with:
         packageName: 'garden-cli'
@@ -41,7 +41,7 @@ jobs:
         srcRepo: '10ko/garden'
         authToken: ${{ secrets.GITHUB_TOKEN }}
     - name: Test Homebrew package
-      if: ${{ !github.event.release.prereleased }}
+      if: github.event.release.prereleased != true
       run: |
         echo 'Testing brew install'
         brew tap garden-io/garden
