@@ -20,6 +20,11 @@ jobs:
     - name: Setup git
       if: github.event.release.prereleased != true
       run: |
+        echo ${{ github.event }}
+        echo -------------------
+        echo ${{ github.event.release }}
+        echo -------------------
+        echo ${{ github.event.release.prereleased }}
         eval "$(ssh-agent -s)"
         mkdir -p ~/.ssh
         ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
