@@ -1,6 +1,8 @@
 name: Node CI
 
-on: [push]
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -8,6 +10,11 @@ jobs:
     runs-on: macOS-latest
 
     steps:
+    - name: Checks if not prerelease
+      if: github.event.release.prereleased != false
+      run: |
+        echo This is a prerelease. Exiting gracefully.
+        exit 0
     - uses: actions/checkout@v1
     - name: Use Node.js 12.x
       uses: actions/setup-node@v1
@@ -39,6 +46,8 @@ jobs:
         authToken: ${{ secrets.GITHUB_TOKEN }}
     - name: Test Homebrew package
       run: |
+        echo 'Testing brew install'
         brew tap garden-io/garden
         brew install garden-cli
+        echo 'Running garden --version'
         garden --version
