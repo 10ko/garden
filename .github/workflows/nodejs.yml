@@ -1,8 +1,6 @@
 name: Node CI
 
-on:
-  release:
-    types: [published]
+on: [release]
 
 jobs:
   build:
@@ -10,11 +8,6 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-    - name: Checks if not prerelease
-      if: github.event.release.prereleased != false
-      run: |
-        echo This is a prerelease. Exiting gracefully.
-        exit 0
     - uses: actions/checkout@v1
     - name: Use Node.js 12.x
       uses: actions/setup-node@v1
@@ -37,6 +30,7 @@ jobs:
             IdentityFile ~/.ssh/homebrew_id
         END
     - name: Release Homebrew
+      if: github.event.release.prereleased == false
       uses: garden-io/update-homebrew-action@v1
       with:
         packageName: 'garden-cli'
@@ -45,6 +39,7 @@ jobs:
         srcRepo: '10ko/garden'
         authToken: ${{ secrets.GITHUB_TOKEN }}
     - name: Test Homebrew package
+      if: github.event.release.prereleased == false
       run: |
         echo 'Testing brew install'
         brew tap garden-io/garden
